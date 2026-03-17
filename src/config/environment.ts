@@ -1,21 +1,12 @@
 export const getEnvironment = () => ({
-  nodeEnv: process.env.NODE_ENV || 'development',
   port: process.env.PORT || 3000,
-  isDevelopment: process.env.NODE_ENV === 'development',
-  isProduction: process.env.NODE_ENV === 'production',
-  isTest: process.env.NODE_ENV === 'test',
-  database: {
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 5432,
-    user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD,
-    name: process.env.DB_NAME || 'koda_db',
+  enviroment: process.env.NODE_ENV || 'development',
+  supabase: {
+    url: process.env.SUPABASE_URL,
+    apiKey: process.env.SUPABASE_API_KEY,
   },
   cors: {
     origin: process.env.CORS_ORIGIN || '*',
-  },
-  logging: {
-    level: process.env.LOG_LEVEL || 'info',
   },
   api: {
     title: process.env.API_TITLE || 'Koda API',
