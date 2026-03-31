@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
 
+app.use(express.json());
 app.use(loggerMiddleware);
 app.use(router);
 app.use(helmet());
