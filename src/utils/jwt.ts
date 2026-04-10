@@ -1,4 +1,4 @@
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { getEnvironment } from '../config/environment';
 
 const env = getEnvironment();
