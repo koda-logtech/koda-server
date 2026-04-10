@@ -1,60 +1,60 @@
-# Implementação de JWT no Koda Server
+# Implementação de JWT no Koda Server (Cookies HttpOnly)
 
-Este documento descreve como a autenticação baseada em JSON Web Token (JWT) está implementada no projeto.
+Este documento descreve como a autenticação baseada em JSON Web Token (JWT) e Cookies está implementada no Koda Server.
 
-## 1. Configuração
+## 1. Configuração e Middleware
+- **Cookie-Parser**: O servidor utiliza `cookie-parser` para processar cookies vindos do cliente.
+- **CORS**: Configurado com `credentials: true` para permitir o recebimento de cookies. A origem deve ser explícita (ex: `http://localhost:5173`) e não pode ser o curinga `*`.
 
-As configurações de JWT são gerenciadas centralmente em `src/config/environment.ts`.
+## 2. Emissão de Tokens (`src/modules/users/users.controller.ts`)
 
-- **JWT_SECRET**: Chave secreta usada para assinar e verificar tokens (Obrigatória).
-- **JWT_EXPIRY**: Tempo de expiração do token de acesso (Padrão: `15m`).
-- **JWT_REFRESH_EXPIRY**: Tempo de expiração do token de atualização (Padrão: `7d`).
+No login e registro bem-sucedidos, o servidor emite dois tokens via cabeçalho `Set-Cookie`:
 
-## 2. Utilitários (`src/utils/jwt.ts`)
-
-O arquivo de utilitários fornece funções para manipulação de tokens usando a biblioteca `jsonwebtoken`.
-
-### Funções Principais:
-- `signToken(payload: TokenPayload, expiresIn?: string)`: Gera um Access Token com ID do usuário, email e cargo.
-- `verifyToken(token: string)`: Verifica a validade de um Access Token e retorna o payload decodificado.
-- `signRefreshToken(userId: number)`: Gera um Refresh Token contendo apenas o ID do usuário.
-- `verifyRefreshToken(token: string)`: Verifica a validade de um Refresh Token.
-
-### Payload do Token:
-```typescript
-interface TokenPayload {
-  id: number;
-  email: string;
-  role: string;
-}
-```
-
-## 3. Middlewares
-
-Existem dois middlewares principais para proteção de rotas:
-
-### `src/middlewares/verifyAuth.ts`
-Este é o middleware padrão usado para proteger rotas de usuário.
-- **Funcionamento**: Extrai o token do cabeçalho `Authorization: Bearer <token>`, verifica sua validade e anexa as informações do usuário ao objeto `req.user`.
-
-### `src/middlewares/auth.ts`
-Oferece funcionalidades adicionais para Controle de Acesso Baseado em Cargos (RBAC).
-- `verifyToken`: Semelhante ao `verifyAuth`, mas com tratamento de erro usando constantes globais.
-- `requireRole(allowedRoles: string | string[])`: Factory que cria um middleware para permitir acesso apenas a cargos específicos (ex: 'admin').
-
-## 4. Uso em Rotas (`src/modules/users/users.routes.ts`)
-
-As rotas são protegidas aplicando o middleware antes do controller.
+- **access_token**:
+  - Duração: 15 minutos.
+  - Flags: `HttpOnly`, `SameSite=Lax`, `Secure` (em produção).
+- **refresh_token**:
+  - Duração: 7 dias.
+  - Flags: `HttpOnly`, `SameSite=Lax`, `Secure` (em produção).
 
 ```typescript
-import { verifyAuth } from '../../middlewares/verifyAuth';
-
-router.get('/profile', verifyAuth, controller.profile);
-router.post('/refresh', verifyAuth, controller.refreshToken);
+// Exemplo de configuração no controlador
+res.cookie('access_token', data.accessToken, { 
+  httpOnly: true, 
+  secure: process.env.NODE_ENV === 'production', 
+  sameSite: 'lax',
+  maxAge: 15 * 60 * 1000 
+});
 ```
 
-## 5. Fluxo de Autenticação
+## 3. Validação de Acesso (`src/middlewares/verifyAuth.ts`)
 
-1. **Login**: O usuário fornece credenciais e recebe um `accessToken` e um `refreshToken`.
-2. **Acesso**: O `accessToken` deve ser enviado em cada requisição protegida no header `Authorization`.
-3. **Expiração**: Quando o `accessToken` expira (15 min), o cliente deve usar o `refreshToken` na rota `/refresh` para obter um novo `accessToken`.
+O middleware `verifyAuth` verifica a identidade do usuário seguindo esta ordem de prioridade:
+1. **Cookies**: Verifica se existe o cookie `access_token`.
+2. **Authorization Header**: Fallback para o header `Authorization: Bearer <token>` (útil para testes via CLI ou integrações legadas).
+
+Se um token válido for encontrado, ele anexa os dados decodificados ao objeto `req.user`.
+
+## 4. Fluxo de Refresh (`POST /users/refresh`)
+
+A rota de renovação de token agora:
+1. Lê o `refresh_token` do cookie.
+2. Verifica a validade.
+3. Se válido, emite um **novo** `access_token` via cookie.
+4. Responde com `status: 200`.
+
+## 5. Fluxo de Logout (`POST /users/logout`)
+
+O logout limpa os cookies no navegador do usuário utilizando `res.clearCookie('access_token')` e `res.clearCookie('refresh_token')`.
+
+## 6. Testes via CLI (CURL)
+
+Para testar as rotas protegidas que usam cookies via CLI, você deve capturar e reenviar os cookies:
+
+```bash
+# Login (salvando cookies)
+curl -X POST http://localhost:3000/users/login -c cookies.txt -d '{"email":"...","password":"..."}'
+
+# Acessar perfil (enviando cookies)
+curl -X GET http://localhost:3000/users/profile -b cookies.txt
+```

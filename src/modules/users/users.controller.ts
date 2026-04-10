@@ -125,20 +125,36 @@ export const login = async (req: Request, res: Response) => {
     return;
   }
 
-  res.status(HTTP_STATUS.OK).json(data);
+  // Configuração dos cookies
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax' as const,
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias para o refresh
+  };
+
+  if (data) {
+    res.cookie('access_token', data.accessToken, { ...cookieOptions, maxAge: 15 * 60 * 1000 });
+    res.cookie('refresh_token', data.refreshToken, cookieOptions);
+    res.status(HTTP_STATUS.OK).json({
+      user: data.user,
+      message: 'Login realizado com sucesso'
+    });
+  } else {
+    res.status(HTTP_STATUS.UNAUTHORIZED).json({ error: 'Erro ao gerar tokens' });
+  }
 };
 
 export const refreshToken = async (req: Request, res: Response) => {
-  const authHeader = req.headers.authorization;
+  const token = req.cookies.refresh_token;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!token) {
     res.status(HTTP_STATUS.UNAUTHORIZED).json({
       error: 'Token não fornecido',
     });
     return;
   }
 
-  const token = authHeader.substring(7);
   const decoded = verifyRefreshToken(token);
 
   if (!decoded) {
@@ -163,7 +179,14 @@ export const refreshToken = async (req: Request, res: Response) => {
     role: user.role,
   });
 
-  res.status(HTTP_STATUS.OK).json({ token: newToken });
+  res.cookie('access_token', newToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax' as const,
+    maxAge: 15 * 60 * 1000 // 15 min
+  });
+
+  res.status(HTTP_STATUS.OK).json({ message: 'Token renovado' });
 };
 
 export const profile = async (req: Request, res: Response) => {
@@ -232,14 +255,14 @@ export const changePassword = async (req: Request, res: Response) => {
 };
 
 export const logout = async (req: Request, res: Response) => {
-  const user = (req as any).user;
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax' as const,
+  };
 
-  if (!user) {
-    res.status(HTTP_STATUS.UNAUTHORIZED).json({
-      error: 'Usuário não autenticado',
-    });
-    return;
-  }
+  res.clearCookie('access_token', cookieOptions);
+  res.clearCookie('refresh_token', cookieOptions);
 
   res.status(HTTP_STATUS.OK).json({
     message: 'Desconectado com sucesso',

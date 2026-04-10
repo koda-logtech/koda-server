@@ -3,16 +3,24 @@ import { verifyToken } from '../utils/jwt';
 import { HTTP_STATUS } from '../utils/constants';
 
 export const verifyAuth = (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
+  let token: string | undefined;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  // Prioridade 1: Cookies (HttpOnly)
+  if (req.cookies && req.cookies.access_token) {
+    token = req.cookies.access_token;
+  } 
+  // Prioridade 2: Authorization Header (Fallback)
+  else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    token = req.headers.authorization.substring(7);
+  }
+
+  if (!token) {
     res.status(HTTP_STATUS.UNAUTHORIZED).json({
       error: 'Token não fornecido',
     });
     return;
   }
 
-  const token = authHeader.substring(7);
   const decoded = verifyToken(token);
 
   if (!decoded) {
