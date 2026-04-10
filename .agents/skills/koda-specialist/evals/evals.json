@@ -1,0 +1,23 @@
+{
+  "skill_name": "koda-specialist",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Crie um novo módulo chamado 'veiculos' para gerenciar a tabela 'veiculos' no Supabase.",
+      "expected_output": "Criação dos arquivos veiculos.service.ts, veiculos.controller.ts, veiculos.routes.ts e registro em src/routes/index.ts seguindo os templates.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Como funciona a paginação global neste projeto?",
+      "expected_output": "Explicação sobre o uso de PAGINATION de utils/constants.ts e o cálculo de range (from/to) nos services.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Adicione um método ao módulo 'users' para buscar usuários por email.",
+      "expected_output": "Adição de findByEmail no service e getByEmail no controller, mantendo o padrão de tratamento de erros.",
+      "files": []
+    }
+  ]
+}
