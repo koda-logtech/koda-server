@@ -1,6 +1,6 @@
 import supabase from '../../config/supabase';
 import { hashPassword, verifyPassword } from '../../utils/password';
-import { signToken } from '../../utils/jwt';
+import { signToken, signRefreshToken } from '../../utils/jwt';
 
 const TABLE = 'users';
 
@@ -26,7 +26,8 @@ interface AuthUser {
 
 interface LoginResponse {
   user: AuthUser;
-  token: string;
+  accessToken: string;
+  refreshToken: string;
 }
 
 export const findAll = (page: number, limit: number) => {
@@ -106,11 +107,13 @@ export const loginUser = async (
       return { error: { message: 'Usuário inativo' } };
     }
 
-    const token = signToken({
+    const accessToken = signToken({
       id: user.id,
       email: user.email,
       role: user.role,
     });
+
+    const refreshToken = signRefreshToken(user.id);
 
     const authUser: AuthUser = {
       id: user.id,
@@ -120,7 +123,7 @@ export const loginUser = async (
       is_active: user.is_active,
     };
 
-    return { data: { user: authUser, token } };
+    return { data: { user: authUser, accessToken, refreshToken } };
   } catch (err) {
     return { error: err };
   }
