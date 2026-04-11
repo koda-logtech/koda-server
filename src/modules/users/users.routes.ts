@@ -9,7 +9,7 @@ router.post('/register', controller.register);
 router.post('/login', controller.login);
 
 // PROTECTED ROUTES (require JWT verification)
-router.post('/refresh', verifyAuth, controller.refreshToken);
+router.post('/refresh', controller.refreshToken);
 router.get('/profile', verifyAuth, controller.profile);
 router.put('/change-password', verifyAuth, controller.changePassword);
 router.post('/logout', verifyAuth, controller.logout);
