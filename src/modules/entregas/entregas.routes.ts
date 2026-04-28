@@ -3,6 +3,8 @@ import * as controller from './entregas.controller';
 
 const router = Router();
 
+router.get('/completo', controller.getAllCompleto);
+router.get('/:id/completo', controller.getByIdCompleto);
 router.get('/', controller.getAll);
 router.get('/:id', controller.getById);
 router.post('/', controller.create);

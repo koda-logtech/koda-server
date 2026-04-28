@@ -2,6 +2,24 @@ import supabase from '../../config/supabase';
 
 const TABLE = 'entregas';
 
+const SELECT_COMPLETO = `
+  *,
+  caminhao!fk_entrega_caminhao (
+    placa,
+    users!fk_caminhao_usuario ( name ),
+    carga!fk_caminhao_carga ( temperatura_atual, temperatura_maxima, temperatura_minima )
+  ),
+  clientes!fk_entrega_cliente ( nome, endereco )
+`;
+
+export const findAllCompleto = (page: number, limit: number) => {
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+  return supabase.from(TABLE).select(SELECT_COMPLETO).range(from, to);
+};
+
+export const findByIdCompleto = (id: number) => supabase.from(TABLE).select(SELECT_COMPLETO).eq('id', id).single();
+
 export const findAll = (page: number, limit: number) => {
   const from = (page - 1) * limit;
   const to = from + limit - 1;
