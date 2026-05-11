@@ -141,7 +141,7 @@ CREATE TABLE caminhao (
         ON DELETE SET NULL ON UPDATE CASCADE,
 
     CONSTRAINT chk_status_caminhao
-        CHECK (status IN ('disponivel', 'em_rota', 'manutencao', 'inativo'))
+        CHECK (status IN ('disponivel', 'em_espera', 'em_rota', 'manutencao', 'inativo'))
 );
 
 CREATE INDEX idx_caminhao_placa            ON caminhao (placa);
