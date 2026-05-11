@@ -1,18 +1,30 @@
 import { Request, Response } from 'express';
 import { HTTP_STATUS, PAGINATION } from '../../utils/constants';
 import * as service from './entregas.service';
+import {
+  coordsAvailable,
+  fetchDrivingDirections,
+} from '../../services/mapboxDirections.service';
 
 type EntregaCompletaJoin = {
   caminhao?: {
     placa: string;
-    users?: { name: string } | null;
+    modelo?: string | null;
+    users?: { name: string; avatar_url?: string | null } | null;
     carga?: {
       temperatura_atual: number | string;
       temperatura_maxima: number | string;
       temperatura_minima: number | string;
+      latitude?: number | string | null;
+      longitude?: number | string | null;
     } | null;
   } | null;
-  clientes?: { nome: string; endereco: string | null } | null;
+  clientes?: {
+    nome: string;
+    endereco: string | null;
+    latitude?: number | string | null;
+    longitude?: number | string | null;
+  } | null;
   [key: string]: unknown;
 };
 
@@ -23,12 +35,18 @@ const mapEntregaCompleta = (row: EntregaCompletaJoin) => {
   return {
     ...rest,
     placa_caminhao: caminhaoRow?.placa ?? null,
+    modelo_caminhao: caminhaoRow?.modelo ?? null,
     nome_cliente: clienteRow?.nome ?? null,
     endereco_cliente: clienteRow?.endereco ?? null,
     nome_motorista: motorista?.name ?? null,
+    motorista_avatar_url: motorista?.avatar_url ?? null,
     temperatura_atual: cargaRow?.temperatura_atual ?? null,
     temperatura_maxima: cargaRow?.temperatura_maxima ?? null,
     temperatura_minima: cargaRow?.temperatura_minima ?? null,
+    latitude_carga: cargaRow?.latitude ?? null,
+    longitude_carga: cargaRow?.longitude ?? null,
+    latitude_cliente: clienteRow?.latitude ?? null,
+    longitude_cliente: clienteRow?.longitude ?? null,
   };
 };
 
@@ -52,6 +70,59 @@ export const getByIdCompleto = async (req: Request, res: Response) => {
     return;
   }
   res.json(mapEntregaCompleta(data as EntregaCompletaJoin));
+};
+
+export const getDirection = async (req: Request, res: Response) => {
+  const token = process.env.MAPBOX_ACCESS_TOKEN?.trim();
+  if (!token) {
+    res.status(HTTP_STATUS.SERVICE_UNAVAILABLE).json({
+      error: 'Directions indisponível: MAPBOX_ACCESS_TOKEN não configurado.',
+    });
+    return;
+  }
+
+  const id = Number(req.params.id);
+  if (!Number.isFinite(id)) {
+    res.status(HTTP_STATUS.BAD_REQUEST).json({ error: 'ID inválido' });
+    return;
+  }
+
+  const { data, error } = await service.findByIdCompleto(id);
+  if (error || !data) {
+    res.status(HTTP_STATUS.NOT_FOUND).json({ error: error?.message ?? 'Não encontrado' });
+    return;
+  }
+
+  const mapped = mapEntregaCompleta(data as EntregaCompletaJoin);
+  const latC = mapped.latitude_carga;
+  const lngC = mapped.longitude_carga;
+  const latCl = mapped.latitude_cliente;
+  const lngCl = mapped.longitude_cliente;
+
+  if (!coordsAvailable(latC, lngC, latCl, lngCl)) {
+    res.status(HTTP_STATUS.BAD_REQUEST).json({
+      error: 'Coordenadas de origem ou destino ausentes ou inválidas para esta entrega.',
+    });
+    return;
+  }
+
+  const lo = Number(latC);
+  const go = Number(lngC);
+  const ld = Number(latCl);
+  const gd = Number(lngCl);
+
+  try {
+    const result = await fetchDrivingDirections(token, go, lo, gd, ld);
+    res.json({
+      entrega_id: id,
+      geometry: result.geometry,
+      duration_seconds: result.durationSeconds,
+      distance_meters: result.distanceMeters,
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Falha ao obter rota';
+    res.status(HTTP_STATUS.BAD_GATEWAY).json({ error: msg });
+  }
 };
 
 export const getAll = async (req: Request, res: Response) => {

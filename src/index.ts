@@ -22,7 +22,8 @@ app.use(
   })
 );
 app.use(loggerMiddleware);
-app.use(router);
+// Prefixo /api alinhado a VITE_API_URL (padrão http://localhost:3000/api)
+app.use('/api', router);
 
 app.get('/health', (req: Request, res: Response) => {
   res.json({

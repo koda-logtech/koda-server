@@ -6,10 +6,17 @@ const SELECT_COMPLETO = `
   *,
   caminhao!fk_entrega_caminhao (
     placa,
-    users!fk_caminhao_usuario ( name ),
-    carga!fk_caminhao_carga ( temperatura_atual, temperatura_maxima, temperatura_minima )
+    modelo,
+    users!fk_caminhao_usuario ( name, avatar_url ),
+    carga!fk_caminhao_carga (
+      temperatura_atual,
+      temperatura_maxima,
+      temperatura_minima,
+      latitude,
+      longitude
+    )
   ),
-  clientes!fk_entrega_cliente ( nome, endereco )
+  clientes!fk_entrega_cliente ( nome, endereco, latitude, longitude )
 `;
 
 export const findAllCompleto = (page: number, limit: number) => {
