@@ -3,6 +3,7 @@ import * as controller from './carga.controller';
 
 const router = Router();
 
+router.get('/telemetria-auditoria', controller.getTelemetriaAuditoria);
 router.get('/', controller.getAll);
 router.get('/:id', controller.getById);
 router.post('/', controller.create);

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { HTTP_STATUS, PAGINATION } from '../../utils/constants';
+import * as cargaService from '../carga/carga.service';
 import * as service from './entregas.service';
 import {
   coordsAvailable,
@@ -8,10 +9,12 @@ import {
 
 type EntregaCompletaJoin = {
   caminhao?: {
+    id_carga?: number | null;
     placa: string;
     modelo?: string | null;
     users?: { name: string; avatar_url?: string | null } | null;
     carga?: {
+      id?: number;
       temperatura_atual: number | string;
       temperatura_maxima: number | string;
       temperatura_minima: number | string;
@@ -50,6 +53,32 @@ const mapEntregaCompleta = (row: EntregaCompletaJoin) => {
   };
 };
 
+type EntregaCompletaMapped = ReturnType<typeof mapEntregaCompleta>;
+
+const resolveIdCarga = (row: EntregaCompletaJoin): number | null => {
+  const fromCaminhao = row.caminhao?.id_carga;
+  if (typeof fromCaminhao === 'number' && fromCaminhao > 0) return fromCaminhao;
+  const fromCarga = row.caminhao?.carga?.id;
+  if (typeof fromCarga === 'number' && fromCarga > 0) return fromCarga;
+  return null;
+};
+
+const attachUltimaAuditoria = async (
+  rows: EntregaCompletaJoin[],
+  mapped: EntregaCompletaMapped[],
+): Promise<(EntregaCompletaMapped & { ultima_auditoria_at: string | null })[]> => {
+  const cargaIds = rows.map((r) => resolveIdCarga(r)).filter((id): id is number => id !== null);
+  const ultimas = await cargaService.findUltimaAuditoriaPorCargas(cargaIds);
+  const ultimaMap = new Map(
+    ultimas.map((u) => [u.id_carga, u.ultima_auditoria_at] as const),
+  );
+  return rows.map((row, i) => {
+    const cid = resolveIdCarga(row);
+    const ua = cid !== null ? ultimaMap.get(cid) ?? null : null;
+    return { ...mapped[i], ultima_auditoria_at: ua };
+  });
+};
+
 export const getAllCompleto = async (req: Request, res: Response) => {
   const page = Number(req.query.page) || PAGINATION.DEFAULT_PAGE;
   const limit = Math.min(Number(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT);
@@ -59,8 +88,10 @@ export const getAllCompleto = async (req: Request, res: Response) => {
     res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ error: error.message });
     return;
   }
-  const mapped = (data ?? []).map((row) => mapEntregaCompleta(row as EntregaCompletaJoin));
-  res.json(mapped);
+  const rawRows = (data ?? []) as EntregaCompletaJoin[];
+  const mapped = rawRows.map((row) => mapEntregaCompleta(row));
+  const enriched = await attachUltimaAuditoria(rawRows, mapped);
+  res.json(enriched);
 };
 
 export const getByIdCompleto = async (req: Request, res: Response) => {
@@ -69,7 +100,10 @@ export const getByIdCompleto = async (req: Request, res: Response) => {
     res.status(HTTP_STATUS.NOT_FOUND).json({ error: error.message });
     return;
   }
-  res.json(mapEntregaCompleta(data as EntregaCompletaJoin));
+  const row = data as EntregaCompletaJoin;
+  const base = mapEntregaCompleta(row);
+  const [enriched] = await attachUltimaAuditoria([row], [base]);
+  res.json(enriched);
 };
 
 export const getDirection = async (req: Request, res: Response) => {
