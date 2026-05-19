@@ -5,10 +5,12 @@ const TABLE = 'entregas';
 const SELECT_COMPLETO = `
   *,
   caminhao!fk_entrega_caminhao (
+    id_carga,
     placa,
     modelo,
     users!fk_caminhao_usuario ( name, avatar_url ),
     carga!fk_caminhao_carga (
+      id,
       temperatura_atual,
       temperatura_maxima,
       temperatura_minima,

@@ -38,13 +38,37 @@ CREATE TABLE carga (
     latitude            DECIMAL(9,6)        NOT NULL,
     longitude           DECIMAL(9,6)        NOT NULL,
     created_at          TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT chk_temperatura
-        CHECK (temperatura_atual BETWEEN temperatura_minima AND temperatura_maxima)
+    updated_at          TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+-- `temperatura_minima` / `temperatura_maxima` são referência operacional; `temperatura_atual` guarda a leitura real (telemetria).
+-- Bases já criadas com o antigo CHECK: executar
+--   ALTER TABLE carga DROP CONSTRAINT IF EXISTS chk_temperatura;
 
 CREATE INDEX idx_carga_tipo ON carga (tipo);
+
+
+-- -------------------------------------------------------------
+-- CARGA — TELEMETRIA / AUDITORIA
+-- Um registo por envio (ex.: app BLE): temperatura + GPS ligados à carga.
+-- No Supabase: criar políticas RLS para INSERT/SELECT conforme a chave anon.
+-- -------------------------------------------------------------
+CREATE TABLE carga_telemetria_auditoria (
+    id              SERIAL PRIMARY KEY,
+    id_carga        INT                 NOT NULL,
+    temperatura     DECIMAL(5,2)        NOT NULL,
+    latitude        DECIMAL(9,6),
+    longitude       DECIMAL(9,6),
+    created_at      TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_carga_telemetria_auditoria_carga
+        FOREIGN KEY (id_carga) REFERENCES carga(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_carga_telemetria_auditoria_carga
+    ON carga_telemetria_auditoria (id_carga);
+
+CREATE INDEX idx_carga_telemetria_auditoria_created
+    ON carga_telemetria_auditoria (created_at DESC);
 
 
 -- -------------------------------------------------------------
