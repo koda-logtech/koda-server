@@ -31,6 +31,14 @@ type EntregaCompletaJoin = {
   [key: string]: unknown;
 };
 
+const resolveIdCarga = (row: EntregaCompletaJoin): number | null => {
+  const fromCaminhao = row.caminhao?.id_carga;
+  if (typeof fromCaminhao === 'number' && fromCaminhao > 0) return fromCaminhao;
+  const fromCarga = row.caminhao?.carga?.id;
+  if (typeof fromCarga === 'number' && fromCarga > 0) return fromCarga;
+  return null;
+};
+
 const mapEntregaCompleta = (row: EntregaCompletaJoin) => {
   const { caminhao: caminhaoRow, clientes: clienteRow, ...rest } = row;
   const motorista = caminhaoRow?.users;
@@ -50,18 +58,11 @@ const mapEntregaCompleta = (row: EntregaCompletaJoin) => {
     longitude_carga: cargaRow?.longitude ?? null,
     latitude_cliente: clienteRow?.latitude ?? null,
     longitude_cliente: clienteRow?.longitude ?? null,
+    id_carga: resolveIdCarga(row),
   };
 };
 
 type EntregaCompletaMapped = ReturnType<typeof mapEntregaCompleta>;
-
-const resolveIdCarga = (row: EntregaCompletaJoin): number | null => {
-  const fromCaminhao = row.caminhao?.id_carga;
-  if (typeof fromCaminhao === 'number' && fromCaminhao > 0) return fromCaminhao;
-  const fromCarga = row.caminhao?.carga?.id;
-  if (typeof fromCarga === 'number' && fromCarga > 0) return fromCarga;
-  return null;
-};
 
 const attachUltimaAuditoria = async (
   rows: EntregaCompletaJoin[],

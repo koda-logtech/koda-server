@@ -14,6 +14,21 @@ export const getTelemetriaAuditoria = async (req: Request, res: Response) => {
   res.json(data ?? []);
 };
 
+export const getTelemetriaAuditoriaByCarga = async (req: Request, res: Response) => {
+  const cargaId = Number(req.params.id);
+  if (!Number.isFinite(cargaId) || cargaId <= 0) {
+    res.status(HTTP_STATUS.BAD_REQUEST).json({ error: 'ID de carga inválido' });
+    return;
+  }
+
+  const { data, error } = await service.findTelemetriaAuditoriaByCarga(cargaId);
+  if (error) {
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ error: error.message });
+    return;
+  }
+  res.json(data ?? []);
+};
+
 export const getAll = async (req: Request, res: Response) => {
   const page = Number(req.query.page) || PAGINATION.DEFAULT_PAGE;
   const limit = Math.min(Number(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT);
