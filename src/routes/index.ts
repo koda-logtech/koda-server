@@ -6,6 +6,7 @@ import clientesRoutes from '../modules/clientes/clientes.routes';
 import armazensRoutes from '../modules/armazens_parceiros/armazens_parceiros.routes';
 import caminhaoRoutes from '../modules/caminhao/caminhao.routes';
 import entregasRoutes from '../modules/entregas/entregas.routes';
+import alertasRoutes from '../modules/alertas/alertas.routes';
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use('/clientes', clientesRoutes);
 router.use('/armazens', armazensRoutes);
 router.use('/caminhoes', caminhaoRoutes);
 router.use('/entregas', entregasRoutes);
+router.use('/alertas', alertasRoutes);
 
 export default router;
