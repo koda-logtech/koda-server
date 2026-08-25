@@ -3,8 +3,7 @@ import supabase from '../../config/supabase';
 const TABLE = 'carga_alertas';
 
 /** Join com a carga para trazer tipo e faixa de referência. */
-const SELECT_WITH_CARGA =
-  '*, carga:carga!fk_carga_alertas_carga ( id, tipo, temperatura_minima, temperatura_maxima )';
+const SELECT_WITH_CARGA = '*, carga:carga!fk_carga_alertas_carga ( id, tipo, temperatura_minima, temperatura_maxima )';
 
 export type AlertaFilters = {
   status?: string;
@@ -38,8 +37,7 @@ export const findAll = (page: number, limit: number, filters: AlertaFilters = {}
   return buildBase(filters).order('aberto_at', { ascending: false }).range(from, to);
 };
 
-export const findById = (id: number) =>
-  supabase.from(TABLE).select(SELECT_WITH_CARGA).eq('id', id).single();
+export const findById = (id: number) => supabase.from(TABLE).select(SELECT_WITH_CARGA).eq('id', id).single();
 
 /** Conta os alertas (usa head:true + count:'exact' — não traz linhas). */
 export const countByStatus = (status = 'aberto') => {
@@ -51,10 +49,9 @@ export const countByStatus = (status = 'aberto') => {
 };
 
 /** Cancela manualmente um alerta (ex.: falso positivo). */
-export const cancelar = (id: number) =>
-  supabase
-    .from(TABLE)
-    .update({ status: 'cancelado', updated_at: new Date().toISOString() })
-    .eq('id', id)
-    .select(SELECT_WITH_CARGA)
-    .single();
+export const cancelar = (id: number) => supabase
+  .from(TABLE)
+  .update({ status: 'cancelado', updated_at: new Date().toISOString() })
+  .eq('id', id)
+  .select(SELECT_WITH_CARGA)
+  .single();

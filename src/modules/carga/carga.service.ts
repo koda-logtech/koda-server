@@ -9,20 +9,16 @@ export const findAll = (page: number, limit: number) => {
   return supabase.from(TABLE).select('*').range(from, to);
 };
 
-export const findById = (id: number) =>
-  supabase.from(TABLE).select('*').eq('id', id).single();
+export const findById = (id: number) => supabase.from(TABLE).select('*').eq('id', id).single();
 
-export const create = (data: Record<string, unknown>) =>
-  supabase.from(TABLE).insert(data).select().single();
+export const create = (data: Record<string, unknown>) => supabase.from(TABLE).insert(data).select().single();
 
-export const update = (id: number, data: Record<string, unknown>) =>
-  supabase.from(TABLE).update(data).eq('id', id).select().single();
+export const update = (id: number, data: Record<string, unknown>) => supabase.from(TABLE).update(data).eq('id', id).select()
+  .single();
 
-export const remove = (id: number) =>
-  supabase.from(TABLE).delete().eq('id', id);
+export const remove = (id: number) => supabase.from(TABLE).delete().eq('id', id);
 
-const TELEMETRIA_AUDITORIA_SELECT =
-  'id, id_carga, temperatura, latitude, longitude, created_at, carga!fk_carga_telemetria_auditoria_carga ( id, tipo )';
+const TELEMETRIA_AUDITORIA_SELECT = 'id, id_carga, temperatura, latitude, longitude, created_at, carga!fk_carga_telemetria_auditoria_carga ( id, tipo )';
 
 const TELEMETRIA_FETCH_CHUNK = 1000;
 

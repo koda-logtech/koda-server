@@ -17,6 +17,12 @@
     "no-param-reassign": "warn",
     "func-names": "off",
     "import/extensions": "off",
-    "import/no-unresolved": "off"
+    "import/no-unresolved": "off",
+    "linebreak-style": "off",
+    "import/prefer-default-export": "off",
+    "max-len": ["error", { "code": 140, "ignoreUrls": true, "ignoreStrings": true, "ignoreTemplateLiterals": true }],
+    "consistent-return": "off",
+    "no-await-in-loop": "off",
+    "@typescript-eslint/no-explicit-any": "warn"
   }
 }

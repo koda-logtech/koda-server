@@ -26,11 +26,10 @@ export function coordsAvailable(
   const ld = parseCoord(latDest);
   const gd = parseCoord(lngDest);
   if (lo === null || go === null || ld === null || gd === null) return false;
-  const valid =
-    Math.abs(lo) <= 90 &&
-    Math.abs(ld) <= 90 &&
-    Math.abs(go) <= 180 &&
-    Math.abs(gd) <= 180;
+  const valid = Math.abs(lo) <= 90
+    && Math.abs(ld) <= 90
+    && Math.abs(go) <= 180
+    && Math.abs(gd) <= 180;
   return valid;
 }
 
@@ -66,10 +65,10 @@ export async function fetchDrivingDirections(
   const route = data.routes?.[0];
   const geom = route?.geometry;
   if (
-    !geom ||
-    geom.type !== 'LineString' ||
-    !Array.isArray(geom.coordinates) ||
-    geom.coordinates.length === 0
+    !geom
+    || geom.type !== 'LineString'
+    || !Array.isArray(geom.coordinates)
+    || geom.coordinates.length === 0
   ) {
     throw new Error('Mapbox Directions: rota vazia ou inválida');
   }

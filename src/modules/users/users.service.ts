@@ -36,17 +36,14 @@ export const findAll = (page: number, limit: number) => {
   return supabase.from(TABLE).select('*').range(from, to);
 };
 
-export const findById = (id: number) =>
-  supabase.from(TABLE).select('*').eq('id', id).single();
+export const findById = (id: number) => supabase.from(TABLE).select('*').eq('id', id).single();
 
-export const create = (data: Record<string, unknown>) =>
-  supabase.from(TABLE).insert(data).select().single();
+export const create = (data: Record<string, unknown>) => supabase.from(TABLE).insert(data).select().single();
 
-export const update = (id: number, data: Record<string, unknown>) =>
-  supabase.from(TABLE).update(data).eq('id', id).select().single();
+export const update = (id: number, data: Record<string, unknown>) => supabase.from(TABLE).update(data).eq('id', id).select()
+  .single();
 
-export const remove = (id: number) =>
-  supabase.from(TABLE).delete().eq('id', id);
+export const remove = (id: number) => supabase.from(TABLE).delete().eq('id', id);
 
 // Authentication functions
 
@@ -54,7 +51,7 @@ export const registerUser = async (
   name: string,
   email: string,
   password: string,
-  phone?: string
+  phone?: string,
 ) => {
   try {
     const hashedPassword = await hashPassword(password);
@@ -84,7 +81,7 @@ export const registerUser = async (
 
 export const loginUser = async (
   email: string,
-  password: string
+  password: string,
 ): Promise<{ data?: LoginResponse; error?: unknown }> => {
   try {
     const { data: user, error: findError } = await supabase
@@ -130,7 +127,7 @@ export const loginUser = async (
 };
 
 export const validateUserByEmail = async (
-  email: string
+  email: string,
 ): Promise<{ data?: User | null; error?: unknown }> => {
   try {
     const { data, error } = await supabase
@@ -155,7 +152,7 @@ export const validateUserByEmail = async (
 export const updatePassword = async (
   userId: number,
   oldPassword: string,
-  newPassword: string
+  newPassword: string,
 ): Promise<{ success?: boolean; error?: unknown }> => {
   try {
     const { data: user, error: findError } = await supabase
@@ -192,7 +189,7 @@ export const updatePassword = async (
 };
 
 export const findUserForAuth = async (
-  userId: number
+  userId: number,
 ): Promise<{ data?: AuthUser | null; error?: unknown }> => {
   try {
     const { data, error } = await supabase

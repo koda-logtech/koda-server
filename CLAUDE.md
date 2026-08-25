@@ -12,11 +12,12 @@ npm run lint         # Check for ESLint violations
 npm run lint:fix     # Auto-fix ESLint violations
 npm run format       # Format code with Prettier
 npm run type-check   # Type check without emitting output
+npm run test         # Run unit tests with Vitest
 ```
 
 `nodemon.json` at project root configures the watch — it runs `tsx src/index.ts` on every `.ts` change inside `src/`.
 
-No test framework is configured yet.
+Unit tests are written with Vitest in `tests/`.
 
 ## Architecture
 
