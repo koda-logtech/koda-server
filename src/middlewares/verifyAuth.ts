@@ -8,9 +8,7 @@ export const verifyAuth = (req: Request, res: Response, next: NextFunction) => {
   // Prioridade 1: Cookies (HttpOnly)
   if (req.cookies && req.cookies.access_token) {
     token = req.cookies.access_token;
-  } 
-  // Prioridade 2: Authorization Header (Fallback)
-  else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+  } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
     token = req.headers.authorization.substring(7);
   }
 

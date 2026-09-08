@@ -19,7 +19,7 @@ app.use(
   cors({
     origin: CORS_ORIGIN,
     credentials: true,
-  })
+  }),
 );
 app.use(loggerMiddleware);
 // Prefixo /api alinhado a VITE_API_URL (padrão http://localhost:3000/api)

@@ -16,16 +16,14 @@ export interface RefreshTokenPayload {
 export const signToken = (
   payload: TokenPayload,
   expiresIn?: string,
-): string => {
-  return jwt.sign(
+): string => jwt.sign(
     payload as object,
     env.jwt.secret as string,
     {
       expiresIn: expiresIn || env.jwt.expiresIn,
       algorithm: 'HS256',
-    } as any
-  );
-};
+    } as any,
+);
 
 export const verifyToken = (token: string): TokenPayload | null => {
   try {
@@ -45,16 +43,14 @@ export const decodeToken = (token: string): TokenPayload | null => {
   }
 };
 
-export const signRefreshToken = (userId: number): string => {
-  return jwt.sign(
+export const signRefreshToken = (userId: number): string => jwt.sign(
     { id: userId } as object,
     env.jwt.secret as string,
     {
       expiresIn: env.jwt.refreshExpiresIn as string,
       algorithm: 'HS256',
-    } as any
-  );
-};
+    } as any,
+);
 
 export const verifyRefreshToken = (
   token: string,

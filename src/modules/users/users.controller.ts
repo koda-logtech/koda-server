@@ -83,7 +83,9 @@ export const register = async (req: Request, res: Response) => {
     return;
   }
 
-  const { name, email, password, phone } = value;
+  const {
+    name, email, password, phone,
+  } = value;
 
   const existingUser = await service.validateUserByEmail(email);
   if (existingUser.data) {
@@ -139,7 +141,7 @@ export const login = async (req: Request, res: Response) => {
     res.cookie('refresh_token', data.refreshToken, cookieOptions);
     res.status(HTTP_STATUS.OK).json({
       user: data.user,
-      message: 'Login realizado com sucesso'
+      message: 'Login realizado com sucesso',
     });
   } else {
     res.status(HTTP_STATUS.UNAUTHORIZED).json({ error: 'Erro ao gerar tokens' });
@@ -185,14 +187,14 @@ export const refreshToken = async (req: Request, res: Response) => {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax' as const,
     path: '/',
-    maxAge: 15 * 60 * 1000 // 15 min
+    maxAge: 15 * 60 * 1000, // 15 min
   });
 
   res.status(HTTP_STATUS.OK).json({ message: 'Token renovado' });
 };
 
 export const profile = async (req: Request, res: Response) => {
-  const user = (req as any).user;
+  const { user } = (req as any);
 
   if (!user) {
     res.status(HTTP_STATUS.UNAUTHORIZED).json({
@@ -224,7 +226,7 @@ export const changePassword = async (req: Request, res: Response) => {
     return;
   }
 
-  const user = (req as any).user;
+  const { user } = (req as any);
 
   if (!user) {
     res.status(HTTP_STATUS.UNAUTHORIZED).json({
