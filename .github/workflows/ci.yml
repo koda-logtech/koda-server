@@ -15,12 +15,6 @@ jobs:
     name: Continuous Integration
     runs-on: ubuntu-latest
 
-    env:
-      NODE_ENV: test
-      JWT_SECRET: test-jwt-secret-key-for-ci-testing-12345
-      SUPABASE_URL: https://placeholder-ci.supabase.co
-      SUPABASE_API_KEY: placeholder-ci-api-key
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
