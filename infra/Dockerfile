@@ -14,10 +14,8 @@ FROM node:22-alpine AS deps
 
 WORKDIR /app
 
-RUN --mount=type=cache,target=/root/.npm \
-    --mount=type=bind,source=package.json,target=package.json \
-    --mount=type=bind,source=package-lock.json,target=package-lock.json \
-    npm ci --omit=dev
+COPY package*.json ./
+RUN npm ci --omit=dev
 
 FROM node:22-alpine AS runner
 
