@@ -10,14 +10,18 @@ const app = express();
 
 const PORT = Number(process.env.PORT) || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
-const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173';
+const rawCorsOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
+const allowedOrigins = rawCorsOrigin
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
 app.use(
   cors({
-    origin: CORS_ORIGIN,
+    origin: allowedOrigins,
     credentials: true,
   }),
 );

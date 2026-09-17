@@ -1,8 +1,17 @@
-import { Request, Response } from 'express';
+import { CookieOptions, Request, Response } from 'express';
 import Joi from 'joi';
 import { HTTP_STATUS, PAGINATION } from '../../utils/constants';
 import * as service from './users.service';
 import { signToken, verifyRefreshToken } from '../../utils/jwt';
+
+const isProd = process.env.NODE_ENV === 'production';
+
+const getBaseCookieOptions = (): CookieOptions => ({
+  httpOnly: true,
+  secure: isProd,
+  sameSite: (isProd ? 'none' : 'lax') as 'none' | 'lax',
+  path: '/',
+});
 
 export const getAll = async (req: Request, res: Response) => {
   const page = Number(req.query.page) || PAGINATION.DEFAULT_PAGE;
@@ -128,17 +137,17 @@ export const login = async (req: Request, res: Response) => {
   }
 
   // Configuração dos cookies
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax' as const,
-    path: '/',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias para o refresh
-  };
+  const baseCookieOptions = getBaseCookieOptions();
 
   if (data) {
-    res.cookie('access_token', data.accessToken, { ...cookieOptions, maxAge: 15 * 60 * 1000 });
-    res.cookie('refresh_token', data.refreshToken, cookieOptions);
+    res.cookie('access_token', data.accessToken, {
+      ...baseCookieOptions,
+      maxAge: 15 * 60 * 1000, // 15 min
+    });
+    res.cookie('refresh_token', data.refreshToken, {
+      ...baseCookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias para o refresh
+    });
     res.status(HTTP_STATUS.OK).json({
       user: data.user,
       message: 'Login realizado com sucesso',
@@ -183,10 +192,7 @@ export const refreshToken = async (req: Request, res: Response) => {
   });
 
   res.cookie('access_token', newToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax' as const,
-    path: '/',
+    ...getBaseCookieOptions(),
     maxAge: 15 * 60 * 1000, // 15 min
   });
 
@@ -259,12 +265,7 @@ export const changePassword = async (req: Request, res: Response) => {
 };
 
 export const logout = async (req: Request, res: Response) => {
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax' as const,
-    path: '/',
-  };
+  const cookieOptions = getBaseCookieOptions();
 
   res.clearCookie('access_token', cookieOptions);
   res.clearCookie('refresh_token', cookieOptions);
