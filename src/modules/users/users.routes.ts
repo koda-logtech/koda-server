@@ -14,6 +14,10 @@ router.get('/profile', verifyAuth, controller.profile);
 router.put('/change-password', verifyAuth, controller.changePassword);
 router.post('/logout', verifyAuth, controller.logout);
 
+// ROLE MANAGEMENT ROUTES
+router.post('/:id/promote', verifyAuth, controller.promote);
+router.post('/:id/revoke', verifyAuth, controller.revoke);
+
 // CRUD ROUTES
 router.get('/', controller.getAll);
 router.get('/:id', controller.getById);

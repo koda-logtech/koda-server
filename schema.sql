@@ -17,7 +17,9 @@ CREATE TABLE users (
     role        VARCHAR(50)         NOT NULL DEFAULT 'user',
     is_active   BOOLEAN             NOT NULL DEFAULT TRUE,
     created_at  TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at  TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at  TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_role_users
+        CHECK (role IN ('user', 'admin', 'driver'))
 );
 
 CREATE INDEX idx_users_email  ON users (email);
