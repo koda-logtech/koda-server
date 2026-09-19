@@ -212,6 +212,5 @@ export const findUserForAuth = async (
   }
 };
 
-export const updateRole = async (userId: number, role: string) => {
-  return supabase.from(TABLE).update({ role }).eq('id', userId).select('id, name, email, phone, avatar_url, role, is_active, created_at, updated_at').single();
-};
+export const updateRole = async (userId: number, role: string) => supabase.from(TABLE).update({ role }).eq('id', userId).select('id, name, email, phone, avatar_url, role, is_active, created_at, updated_at')
+  .single();

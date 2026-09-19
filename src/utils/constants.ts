@@ -41,6 +41,7 @@ export const PAGINATION = {
   MAX_LIMIT: 100,
 };
 
+// eslint-disable-next-line no-shadow
 export enum Role {
   USER = 'user',
   ADMIN = 'admin',
