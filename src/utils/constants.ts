@@ -40,3 +40,9 @@ export const PAGINATION = {
   DEFAULT_LIMIT: 10,
   MAX_LIMIT: 100,
 };
+
+export enum Role {
+  USER = 'user',
+  ADMIN = 'admin',
+  DRIVER = 'driver',
+}

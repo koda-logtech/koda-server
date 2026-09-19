@@ -1,6 +1,7 @@
 import supabase from '../../config/supabase';
 import { hashPassword, verifyPassword } from '../../utils/password';
 import { signToken, signRefreshToken } from '../../utils/jwt';
+import { Role } from '../../utils/constants';
 
 const TABLE = 'users';
 
@@ -63,7 +64,7 @@ export const registerUser = async (
         email,
         password: hashedPassword,
         phone,
-        role: 'user',
+        role: Role.USER,
         is_active: true,
       })
       .select('id, name, email, phone, avatar_url, role, is_active, created_at, updated_at')
@@ -209,4 +210,8 @@ export const findUserForAuth = async (
   } catch (err) {
     return { error: err };
   }
+};
+
+export const updateRole = async (userId: number, role: string) => {
+  return supabase.from(TABLE).update({ role }).eq('id', userId).select('id, name, email, phone, avatar_url, role, is_active, created_at, updated_at').single();
 };
