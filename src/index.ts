@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import loggerMiddleware from './middlewares/logger';
 import router from './routes';
+import { seedAdminUser } from './modules/users/users.service';
 
 const app = express();
 
@@ -37,8 +38,20 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Servidor rodando em http://0.0.0.0:${PORT} em modo ${NODE_ENV}`);
-});
+const startServer = async () => {
+  try {
+    await seedAdminUser();
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('[Startup] Erro ao executar seed do admin:', error);
+  }
+
+  app.listen(PORT, '0.0.0.0', () => {
+    // eslint-disable-next-line no-console
+    console.log(`Servidor rodando em http://0.0.0.0:${PORT} em modo ${NODE_ENV}`);
+  });
+};
+
+startServer();
 
 export default app;

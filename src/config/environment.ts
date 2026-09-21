@@ -22,5 +22,10 @@ export const getEnvironment = () => {
       expiresIn: process.env.JWT_EXPIRY || '1h',
       refreshExpiresIn: process.env.JWT_REFRESH_EXPIRY || '7d',
     },
+    admin: {
+      email: process.env.ADMIN_EMAIL,
+      password: process.env.ADMIN_PASSWORD,
+      name: process.env.ADMIN_NAME || 'Administrador',
+    },
   };
 };
