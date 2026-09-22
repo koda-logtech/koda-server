@@ -214,11 +214,13 @@ export const approve = async (id: string, origin?: string) => {
   const baseUrl = rawOrigin.trim().replace(/\/$/, '');
   const activationLink = `${baseUrl}/ativar-conta?token=${activationToken}`;
 
-  // 5. Enviar e-mail de ativação via Resend
-  const emailResult = await sendActivationEmail({
+  // 5. Enviar e-mail de ativação em background para resposta imediata
+  sendActivationEmail({
     to: userEmail,
     name: userName,
     activationLink,
+  }).catch((err) => {
+    console.error('Falha ao enviar e-mail de ativação em background:', err);
   });
 
   const userData = {
@@ -235,7 +237,6 @@ export const approve = async (id: string, origin?: string) => {
       request: formatAccessRequest(updatedRequest),
       activationToken,
       activationLink,
-      emailSent: emailResult.success,
       message: 'Solicitação aprovada com sucesso',
     },
   };
