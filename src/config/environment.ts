@@ -29,7 +29,14 @@ export const getEnvironment = () => {
     },
     email: {
       resendApiKey: process.env.RESEND_API_KEY,
-      from: process.env.EMAIL_FROM || 'Koda <onboarding@resend.dev>',
+      from: process.env.EMAIL_FROM || process.env.SMTP_USER || 'Koda <onboarding@resend.dev>',
+      smtp: {
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: Number(process.env.SMTP_PORT) || 465,
+        secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === 'true' : true,
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
     },
   };
 };
