@@ -1,6 +1,6 @@
 import supabase from '../../config/supabase';
 import { hashPassword, verifyPassword } from '../../utils/password';
-import { signToken, signRefreshToken } from '../../utils/jwt';
+import { signToken, signRefreshToken, verifyActivationToken } from '../../utils/jwt';
 import { Role } from '../../utils/constants';
 
 const TABLE = 'users';
@@ -214,6 +214,47 @@ export const findUserForAuth = async (
 
 export const updateRole = async (userId: number, role: string) => supabase.from(TABLE).update({ role }).eq('id', userId).select('id, name, email, phone, avatar_url, role, is_active, created_at, updated_at')
   .single();
+
+export const activateUser = async (
+  token: string,
+  newPassword: string,
+): Promise<{ success?: boolean; error?: { message: string } }> => {
+  try {
+    const decoded = verifyActivationToken(token);
+    if (!decoded) {
+      return { error: { message: 'Token de ativação inválido ou expirado' } };
+    }
+
+    const { data: user, error: findError } = await supabase
+      .from(TABLE)
+      .select('id, email, is_active')
+      .eq('id', decoded.id)
+      .single();
+
+    if (findError || !user) {
+      return { error: { message: 'Usuário não encontrado' } };
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+
+    const { error: updateError } = await supabase
+      .from(TABLE)
+      .update({
+        password: hashedPassword,
+        is_active: true,
+      })
+      .eq('id', user.id);
+
+    if (updateError) {
+      return { error: { message: updateError.message } };
+    }
+
+    return { success: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Erro ao ativar conta';
+    return { error: { message } };
+  }
+};
 
 export const seedAdminUser = async (): Promise<void> => {
   const email = process.env.ADMIN_EMAIL?.trim();

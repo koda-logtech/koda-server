@@ -62,3 +62,33 @@ export const verifyRefreshToken = (
     return null;
   }
 };
+
+export interface ActivationTokenPayload {
+  id: number;
+  email: string;
+  type: 'activation';
+}
+
+export const signActivationToken = (
+  payload: { id: number; email: string },
+  expiresIn = '48h',
+): string => jwt.sign(
+  { id: payload.id, email: payload.email, type: 'activation' },
+  env.jwt.secret as string,
+  {
+    expiresIn,
+    algorithm: 'HS256',
+  } as any,
+);
+
+export const verifyActivationToken = (token: string): ActivationTokenPayload | null => {
+  try {
+    const decoded = jwt.verify(token, env.jwt.secret as string) as ActivationTokenPayload;
+    if (decoded.type !== 'activation') {
+      return null;
+    }
+    return decoded;
+  } catch {
+    return null;
+  }
+};

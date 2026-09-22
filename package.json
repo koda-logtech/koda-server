@@ -27,7 +27,8 @@
     "helmet": "^7.0.0",
     "joi": "^17.9.2",
     "jsonwebtoken": "^9.0.3",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "resend": "^6.28.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

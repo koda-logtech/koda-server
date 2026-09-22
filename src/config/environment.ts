@@ -27,5 +27,9 @@ export const getEnvironment = () => {
       password: process.env.ADMIN_PASSWORD,
       name: process.env.ADMIN_NAME || 'Administrador',
     },
+    email: {
+      resendApiKey: process.env.RESEND_API_KEY,
+      from: process.env.EMAIL_FROM || 'Koda <onboarding@resend.dev>',
+    },
   };
 };

@@ -83,6 +83,11 @@ const promoteSchema = Joi.object({
   role: Joi.string().valid(Role.ADMIN, Role.DRIVER).required(),
 });
 
+const activateSchema = Joi.object({
+  token: Joi.string().required(),
+  password: Joi.string().min(6).required(),
+});
+
 // Authentication controllers
 
 export const register = async (req: Request, res: Response) => {
@@ -305,4 +310,29 @@ export const revoke = async (req: Request, res: Response) => {
     return;
   }
   res.status(HTTP_STATUS.OK).json({ message: 'Role revogada com sucesso', user: data });
+};
+
+export const activate = async (req: Request, res: Response) => {
+  const { error: validationError, value } = activateSchema.validate(req.body);
+
+  if (validationError) {
+    res.status(HTTP_STATUS.BAD_REQUEST).json({
+      error: 'Dados de entrada inválidos',
+      details: validationError.message,
+    });
+    return;
+  }
+
+  const { success, error } = await service.activateUser(value.token, value.password);
+
+  if (error || !success) {
+    res.status(HTTP_STATUS.BAD_REQUEST).json({
+      error: (error as any)?.message || 'Falha ao ativar conta',
+    });
+    return;
+  }
+
+  res.status(HTTP_STATUS.OK).json({
+    message: 'Conta ativada com sucesso. Você já pode fazer login.',
+  });
 };

@@ -36,3 +36,15 @@ export const verifyAuth = (req: Request, res: Response, next: NextFunction) => {
 
   next();
 };
+
+export const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user || req.user.role !== Role.ADMIN) {
+    res.status(HTTP_STATUS.FORBIDDEN).json({
+      error: 'Acesso negado',
+      message: 'Apenas administradores podem acessar este recurso',
+    });
+    return;
+  }
+
+  next();
+};

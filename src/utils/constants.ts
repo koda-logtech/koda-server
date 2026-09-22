@@ -47,3 +47,10 @@ export enum Role {
   ADMIN = 'admin',
   DRIVER = 'driver',
 }
+
+// eslint-disable-next-line no-shadow
+export enum AccessRequestStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+}

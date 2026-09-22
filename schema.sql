@@ -214,3 +214,28 @@ CREATE INDEX idx_entregas_caminhao ON entregas (id_caminhao);
 CREATE INDEX idx_entregas_cliente  ON entregas (id_cliente);
 CREATE INDEX idx_entregas_armazem  ON entregas (id_armazem_parceiro);
 CREATE INDEX idx_entregas_status   ON entregas (status);
+
+
+-- -------------------------------------------------------------
+-- ACCESS REQUESTS
+-- Solicitações de acesso de novos usuários pendentes de aprovação
+-- -------------------------------------------------------------
+CREATE TABLE access_requests (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nome        VARCHAR(150)    NOT NULL,
+    email       VARCHAR(255)    NOT NULL,
+    empresa     VARCHAR(150)    NOT NULL,
+    cargo       VARCHAR(100)    NOT NULL,
+    descricao   TEXT            NOT NULL,
+    status      VARCHAR(50)     NOT NULL DEFAULT 'pending',
+    created_at  TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT chk_status_access_requests
+        CHECK (status IN ('pending', 'approved', 'rejected'))
+);
+
+CREATE INDEX idx_access_requests_email      ON access_requests (email);
+CREATE INDEX idx_access_requests_status     ON access_requests (status);
+CREATE INDEX idx_access_requests_created_at ON access_requests (created_at DESC);
+
