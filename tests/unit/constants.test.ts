@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { HTTP_STATUS, ERROR_MESSAGES, PAGINATION, ENVIRONMENTS } from '../../src/utils/constants.js';
+import { HTTP_STATUS, ERROR_MESSAGES, PAGINATION, ENVIRONMENTS, AccessRequestStatus } from '../../src/utils/constants.js';
 
 describe('Constants', () => {
   it('should have standard HTTP status codes', () => {
@@ -28,4 +28,11 @@ describe('Constants', () => {
     expect(ENVIRONMENTS.PRODUCTION).toBe('production');
     expect(ENVIRONMENTS.TEST).toBe('test');
   });
+
+  it('should define access request status values', () => {
+    expect(AccessRequestStatus.PENDING).toBe('pending');
+    expect(AccessRequestStatus.APPROVED).toBe('approved');
+    expect(AccessRequestStatus.REJECTED).toBe('rejected');
+  });
 });
+

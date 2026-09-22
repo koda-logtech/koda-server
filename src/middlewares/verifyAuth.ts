@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwt';
-import { HTTP_STATUS } from '../utils/constants';
+import { HTTP_STATUS, Role } from '../utils/constants';
 
 export const verifyAuth = (req: Request, res: Response, next: NextFunction) => {
   let token: string | undefined;
@@ -31,8 +31,20 @@ export const verifyAuth = (req: Request, res: Response, next: NextFunction) => {
   req.user = {
     id: decoded.id || 0,
     email: decoded.email,
-    role: decoded.role || 'user',
+    role: decoded.role || Role.USER,
   };
+
+  next();
+};
+
+export const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user || req.user.role !== Role.ADMIN) {
+    res.status(HTTP_STATUS.FORBIDDEN).json({
+      error: 'Acesso negado',
+      message: 'Apenas administradores podem acessar este recurso',
+    });
+    return;
+  }
 
   next();
 };

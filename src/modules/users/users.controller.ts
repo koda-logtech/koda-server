@@ -1,6 +1,6 @@
 import { CookieOptions, Request, Response } from 'express';
 import Joi from 'joi';
-import { HTTP_STATUS, PAGINATION } from '../../utils/constants';
+import { HTTP_STATUS, PAGINATION, Role } from '../../utils/constants';
 import * as service from './users.service';
 import { signToken, verifyRefreshToken } from '../../utils/jwt';
 
@@ -77,6 +77,15 @@ const loginSchema = Joi.object({
 const changePasswordSchema = Joi.object({
   oldPassword: Joi.string().required(),
   newPassword: Joi.string().min(6).required(),
+});
+
+const promoteSchema = Joi.object({
+  role: Joi.string().valid(Role.ADMIN, Role.DRIVER).required(),
+});
+
+const activateSchema = Joi.object({
+  token: Joi.string().required(),
+  password: Joi.string().min(6).required(),
 });
 
 // Authentication controllers
@@ -272,5 +281,58 @@ export const logout = async (req: Request, res: Response) => {
 
   res.status(HTTP_STATUS.OK).json({
     message: 'Desconectado com sucesso',
+  });
+};
+
+export const promote = async (req: Request, res: Response) => {
+  const { error: validationError, value } = promoteSchema.validate(req.body);
+
+  if (validationError) {
+    res.status(HTTP_STATUS.BAD_REQUEST).json({
+      error: 'Dados de entrada inválidos',
+      details: validationError.message,
+    });
+    return;
+  }
+
+  const { data, error } = await service.updateRole(Number(req.params.id), value.role);
+  if (error) {
+    res.status(HTTP_STATUS.BAD_REQUEST).json({ error: error.message });
+    return;
+  }
+  res.status(HTTP_STATUS.OK).json({ message: 'Role promovida com sucesso', user: data });
+};
+
+export const revoke = async (req: Request, res: Response) => {
+  const { data, error } = await service.updateRole(Number(req.params.id), Role.USER);
+  if (error) {
+    res.status(HTTP_STATUS.BAD_REQUEST).json({ error: error.message });
+    return;
+  }
+  res.status(HTTP_STATUS.OK).json({ message: 'Role revogada com sucesso', user: data });
+};
+
+export const activate = async (req: Request, res: Response) => {
+  const { error: validationError, value } = activateSchema.validate(req.body);
+
+  if (validationError) {
+    res.status(HTTP_STATUS.BAD_REQUEST).json({
+      error: 'Dados de entrada inválidos',
+      details: validationError.message,
+    });
+    return;
+  }
+
+  const { success, error } = await service.activateUser(value.token, value.password);
+
+  if (error || !success) {
+    res.status(HTTP_STATUS.BAD_REQUEST).json({
+      error: (error as any)?.message || 'Falha ao ativar conta',
+    });
+    return;
+  }
+
+  res.status(HTTP_STATUS.OK).json({
+    message: 'Conta ativada com sucesso. Você já pode fazer login.',
   });
 };

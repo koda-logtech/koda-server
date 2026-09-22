@@ -40,3 +40,17 @@ export const PAGINATION = {
   DEFAULT_LIMIT: 10,
   MAX_LIMIT: 100,
 };
+
+// eslint-disable-next-line no-shadow
+export enum Role {
+  USER = 'user',
+  ADMIN = 'admin',
+  DRIVER = 'driver',
+}
+
+// eslint-disable-next-line no-shadow
+export enum AccessRequestStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+}

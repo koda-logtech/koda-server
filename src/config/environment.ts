@@ -22,5 +22,21 @@ export const getEnvironment = () => {
       expiresIn: process.env.JWT_EXPIRY || '1h',
       refreshExpiresIn: process.env.JWT_REFRESH_EXPIRY || '7d',
     },
+    admin: {
+      email: process.env.ADMIN_EMAIL,
+      password: process.env.ADMIN_PASSWORD,
+      name: process.env.ADMIN_NAME || 'Administrador',
+    },
+    email: {
+      resendApiKey: process.env.RESEND_API_KEY,
+      from: process.env.EMAIL_FROM || process.env.SMTP_USER || 'Koda <onboarding@resend.dev>',
+      smtp: {
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: Number(process.env.SMTP_PORT) || 465,
+        secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === 'true' : true,
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    },
   };
 };
