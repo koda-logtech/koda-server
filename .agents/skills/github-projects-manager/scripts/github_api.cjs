@@ -108,6 +108,13 @@ const actions = {
     console.log(`Sucesso: Issue vinculada ao Projeto ${projectNumber} da ${ORG}.`);
   },
 
+  // Cria issue lendo corpo de arquivo e adiciona ao projeto
+  createAndLinkIssueFromFile: async (projectNumber, repoName, title, filePath) => {
+    const fs = require('fs');
+    const body = fs.readFileSync(filePath, 'utf8');
+    await actions.createAndLinkIssue(projectNumber, repoName, title, body);
+  },
+
   // Vincula issue existente ao projeto
   linkExistingIssue: async (projectNumber, repoName, issueNumber) => {
     console.log(`Vinculando Issue #${issueNumber} do repo ${repoName} ao Projeto #${projectNumber}...`);
