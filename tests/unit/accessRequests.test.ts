@@ -265,6 +265,45 @@ describe('Access Requests Service', () => {
       expect(result.data).toBeDefined();
       expect(result.data?.status).toBe(AccessRequestStatus.REJECTED);
     });
+
+    it('should reject pending request with reason and return formatted data', async () => {
+      const mockRequest = {
+        id: 'req-uuid-2',
+        nome: 'Mariana Lima',
+        email: 'mariana@empresa.com',
+        status: AccessRequestStatus.PENDING,
+        created_at: '2026-09-21T20:00:00.000Z',
+      };
+
+      const mockReqSingle = vi.fn().mockResolvedValue({ data: mockRequest, error: null });
+      const mockReqEq = vi.fn().mockReturnValue({ single: mockReqSingle });
+
+      const mockUpdatedReq = {
+        ...mockRequest,
+        status: AccessRequestStatus.REJECTED,
+        rejection_reason: 'E-mail corporativo inválido',
+      };
+      const mockReqSingleAfterUpdate = vi.fn().mockResolvedValue({ data: mockUpdatedReq, error: null });
+      const mockReqSelectAfterUpdate = vi.fn().mockReturnValue({ single: mockReqSingleAfterUpdate });
+      const mockReqEqUpdate = vi.fn().mockReturnValue({ select: mockReqSelectAfterUpdate });
+      const mockReqUpdate = vi.fn().mockReturnValue({ eq: mockReqEqUpdate });
+
+      (supabase.from as any).mockImplementation((table: string) => {
+        if (table === 'access_requests') {
+          return {
+            select: vi.fn().mockReturnValue({ eq: mockReqEq }),
+            update: mockReqUpdate,
+          };
+        }
+        return {};
+      });
+
+      const result = await accessRequestsService.reject('req-uuid-2', 'E-mail corporativo inválido', false);
+
+      expect(result.data).toBeDefined();
+      expect(result.data?.status).toBe(AccessRequestStatus.REJECTED);
+      expect(result.data?.rejectionReason).toBe('E-mail corporativo inválido');
+    });
   });
 
   describe('activateUser', () => {

@@ -3,7 +3,7 @@ import supabase from '../../config/supabase';
 import { hashPassword } from '../../utils/password';
 import { signActivationToken } from '../../utils/jwt';
 import { Role, AccessRequestStatus } from '../../utils/constants';
-import { sendActivationEmail } from '../../services/email.service';
+import { sendActivationEmail, sendRejectionEmail } from '../../services/email.service';
 
 const TABLE = 'access_requests';
 const USERS_TABLE = 'users';
@@ -24,6 +24,8 @@ export interface AccessRequestModel {
   cargo: string;
   descricao: string;
   status: AccessRequestStatus;
+  rejection_reason?: string;
+  rejectionReason?: string;
   created_at: string;
   updated_at: string;
   createdAt?: string;
@@ -39,6 +41,8 @@ export const formatAccessRequest = (row: any) => {
     cargo: row.cargo,
     descricao: row.descricao,
     status: row.status,
+    rejectionReason: row.rejection_reason || row.rejectionReason,
+    rejection_reason: row.rejection_reason,
     createdAt: row.created_at || row.createdAt,
     created_at: row.created_at,
     updated_at: row.updated_at,
@@ -242,7 +246,7 @@ export const approve = async (id: string, origin?: string) => {
   };
 };
 
-export const reject = async (id: string) => {
+export const reject = async (id: string, reason?: string, notify = true) => {
   const { data: request, error: findError } = await supabase
     .from(TABLE)
     .select('*')
@@ -260,19 +264,56 @@ export const reject = async (id: string) => {
     };
   }
 
-  const { data: updatedRequest, error: updateError } = await supabase
+  const updatePayload: Record<string, any> = {
+    status: AccessRequestStatus.REJECTED,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (reason && reason.trim()) {
+    updatePayload.rejection_reason = reason.trim();
+  }
+
+  let { data: updatedRequest, error: updateError } = await supabase
     .from(TABLE)
-    .update({
-      status: AccessRequestStatus.REJECTED,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updatePayload)
     .eq('id', id)
     .select('*')
     .single();
+
+  // Caso a coluna rejection_reason ainda não tenha sido criada no Supabase, tenta atualizar sem ela
+  if (updateError && updateError.message?.includes('rejection_reason')) {
+    delete updatePayload.rejection_reason;
+    const retry = await supabase
+      .from(TABLE)
+      .update(updatePayload)
+      .eq('id', id)
+      .select('*')
+      .single();
+    updatedRequest = retry.data;
+    updateError = retry.error;
+  }
 
   if (updateError) {
     return { error: updateError };
   }
 
-  return { data: formatAccessRequest(updatedRequest) };
+  // Enviar e-mail de notificação de rejeição em background se notify for true
+  if (notify && request.email) {
+    sendRejectionEmail({
+      to: request.email,
+      name: request.nome,
+      reason: reason?.trim(),
+    }).catch((err) => {
+      // eslint-disable-next-line no-console
+      console.error('[Email] Falha ao enviar e-mail de rejeição em background:', err);
+    });
+  }
+
+  return {
+    data: formatAccessRequest({
+      ...(updatedRequest || request),
+      status: AccessRequestStatus.REJECTED,
+      rejection_reason: reason?.trim(),
+    }),
+  };
 };
