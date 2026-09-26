@@ -86,7 +86,8 @@ export const approve = async (req: Request, res: Response) => {
 };
 
 export const reject = async (req: Request, res: Response) => {
-  const result = await service.reject(req.params.id);
+  const { reason, notify } = req.body || {};
+  const result = await service.reject(req.params.id, reason, notify);
 
   if (result.notFound) {
     res.status(HTTP_STATUS.NOT_FOUND).json({ error: result.error?.message });
