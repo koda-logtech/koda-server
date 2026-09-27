@@ -148,26 +148,22 @@ const sendEmail = async ({ to, subject, html }: SendMailRawParams): Promise<{ su
   }
 };
 
-export const sendActivationEmail = async ({
+export const sendActivationEmail = ({
   to,
   name,
   activationLink,
-}: SendActivationEmailParams): Promise<{ success: boolean; id?: string; error?: string }> => {
-  return await sendEmail({
-    to,
-    subject: 'Seu acesso à plataforma Koda foi liberado!',
-    html: getActivationHtmlTemplate(name, activationLink),
-  });
-};
+}: SendActivationEmailParams): Promise<{ success: boolean; id?: string; error?: string }> => sendEmail({
+  to,
+  subject: 'Seu acesso à plataforma Koda foi liberado!',
+  html: getActivationHtmlTemplate(name, activationLink),
+});
 
-export const sendRejectionEmail = async ({
+export const sendRejectionEmail = ({
   to,
   name,
   reason,
-}: SendRejectionEmailParams): Promise<{ success: boolean; id?: string; error?: string }> => {
-  return await sendEmail({
-    to,
-    subject: 'Atualização sobre sua solicitação de acesso — Koda',
-    html: getRejectionHtmlTemplate(name, reason),
-  });
-};
+}: SendRejectionEmailParams): Promise<{ success: boolean; id?: string; error?: string }> => sendEmail({
+  to,
+  subject: 'Atualização sobre sua solicitação de acesso — Koda',
+  html: getRejectionHtmlTemplate(name, reason),
+});
