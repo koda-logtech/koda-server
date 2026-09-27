@@ -24,11 +24,6 @@ export const create = async (req: Request, res: Response) => {
 
   const result = await service.create(value);
 
-  if (result.conflict) {
-    res.status(HTTP_STATUS.CONFLICT).json({ error: result.error?.message });
-    return;
-  }
-
   if (result.error) {
     res.status(HTTP_STATUS.BAD_REQUEST).json({ error: (result.error as any).message });
     return;
@@ -86,7 +81,8 @@ export const approve = async (req: Request, res: Response) => {
 };
 
 export const reject = async (req: Request, res: Response) => {
-  const result = await service.reject(req.params.id);
+  const { reason, notify } = req.body || {};
+  const result = await service.reject(req.params.id, reason, notify);
 
   if (result.notFound) {
     res.status(HTTP_STATUS.NOT_FOUND).json({ error: result.error?.message });

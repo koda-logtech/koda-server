@@ -3,7 +3,7 @@ import supabase from '../../config/supabase';
 import { hashPassword } from '../../utils/password';
 import { signActivationToken } from '../../utils/jwt';
 import { Role, AccessRequestStatus } from '../../utils/constants';
-import { sendActivationEmail } from '../../services/email.service';
+import { sendActivationEmail, sendRejectionEmail } from '../../services/email.service';
 
 const TABLE = 'access_requests';
 const USERS_TABLE = 'users';
@@ -24,6 +24,8 @@ export interface AccessRequestModel {
   cargo: string;
   descricao: string;
   status: AccessRequestStatus;
+  rejection_reason?: string;
+  rejectionReason?: string;
   created_at: string;
   updated_at: string;
   createdAt?: string;
@@ -39,6 +41,8 @@ export const formatAccessRequest = (row: any) => {
     cargo: row.cargo,
     descricao: row.descricao,
     status: row.status,
+    rejectionReason: row.rejection_reason || row.rejectionReason,
+    rejection_reason: row.rejection_reason,
     createdAt: row.created_at || row.createdAt,
     created_at: row.created_at,
     updated_at: row.updated_at,
@@ -55,13 +59,6 @@ export const create = async (data: CreateAccessRequestDTO) => {
     .eq('email', email)
     .maybeSingle();
 
-  if (existingUser) {
-    return {
-      conflict: true,
-      error: { message: 'Este e-mail já possui cadastro na plataforma' },
-    };
-  }
-
   // 2. Verificar se já existe solicitação pendente para o e-mail
   const { data: pendingRequest } = await supabase
     .from(TABLE)
@@ -70,10 +67,21 @@ export const create = async (data: CreateAccessRequestDTO) => {
     .eq('status', AccessRequestStatus.PENDING)
     .maybeSingle();
 
-  if (pendingRequest) {
+  // Prevenção contra Enumeração de Usuários (OWASP User Enumeration / Account Harvesting):
+  // Se já existir usuário cadastrado ou solicitação pendente, não cria duplicata nem envia e-mail,
+  // retornando sucesso neutro e indistinguível para manter a superfície de ataque mínima.
+  if (existingUser || pendingRequest) {
     return {
-      conflict: true,
-      error: { message: 'Já existe uma solicitação de acesso pendente para este e-mail' },
+      data: {
+        id: 'ack',
+        nome: data.nome.trim(),
+        email,
+        empresa: data.empresa.trim(),
+        cargo: data.cargo.trim(),
+        descricao: data.descricao.trim(),
+        status: AccessRequestStatus.PENDING,
+        createdAt: new Date().toISOString(),
+      },
     };
   }
 
@@ -242,7 +250,7 @@ export const approve = async (id: string, origin?: string) => {
   };
 };
 
-export const reject = async (id: string) => {
+export const reject = async (id: string, reason?: string, notify = true) => {
   const { data: request, error: findError } = await supabase
     .from(TABLE)
     .select('*')
@@ -260,19 +268,58 @@ export const reject = async (id: string) => {
     };
   }
 
-  const { data: updatedRequest, error: updateError } = await supabase
+  const updatePayload: Record<string, any> = {
+    status: AccessRequestStatus.REJECTED,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (reason && reason.trim()) {
+    updatePayload.rejection_reason = reason.trim();
+  }
+
+  let { data: updatedRequest, error: updateError } = await supabase
     .from(TABLE)
-    .update({
-      status: AccessRequestStatus.REJECTED,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updatePayload)
     .eq('id', id)
     .select('*')
     .single();
+
+  // Caso a coluna rejection_reason ainda não tenha sido criada no Supabase, tenta atualizar sem ela
+  if (updateError && 'rejection_reason' in updatePayload) {
+    // eslint-disable-next-line no-console
+    console.warn('[AccessRequests] Falha ao persistir rejection_reason no banco. Aplicando fallback sem o campo:', updateError.message || updateError);
+    delete updatePayload.rejection_reason;
+    const retry = await supabase
+      .from(TABLE)
+      .update(updatePayload)
+      .eq('id', id)
+      .select('*')
+      .single();
+    updatedRequest = retry.data;
+    updateError = retry.error;
+  }
 
   if (updateError) {
     return { error: updateError };
   }
 
-  return { data: formatAccessRequest(updatedRequest) };
+  // Enviar e-mail de notificação de rejeição em background se notify for true
+  if (notify && request.email) {
+    sendRejectionEmail({
+      to: request.email,
+      name: request.nome,
+      reason: reason?.trim(),
+    }).catch((err) => {
+      // eslint-disable-next-line no-console
+      console.error('[Email] Falha ao enviar e-mail de rejeição em background:', err);
+    });
+  }
+
+  return {
+    data: formatAccessRequest({
+      ...(updatedRequest || request),
+      status: AccessRequestStatus.REJECTED,
+      rejection_reason: reason?.trim(),
+    }),
+  };
 };
