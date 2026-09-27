@@ -30,17 +30,24 @@ describe('Access Requests Service', () => {
   });
 
   describe('create', () => {
-    it('should return conflict if user already exists in users table', async () => {
+    it('should return generic success without inserting or leaking existence if user already exists in users table', async () => {
       const mockMaybeSingle = vi.fn().mockResolvedValue({
         data: { id: 1, email: 'existente@koda.com' },
         error: null,
       });
       const mockEq = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle });
       const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
+      const mockInsert = vi.fn();
 
       (supabase.from as any).mockImplementation((table: string) => {
         if (table === 'users') {
           return { select: mockSelect };
+        }
+        if (table === 'access_requests') {
+          return {
+            select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) }) }) }),
+            insert: mockInsert,
+          };
         }
         return {};
       });
@@ -53,11 +60,13 @@ describe('Access Requests Service', () => {
         descricao: 'Preciso de acesso',
       });
 
-      expect(result.conflict).toBe(true);
-      expect(result.error?.message).toContain('já possui cadastro');
+      expect(result.data).toBeDefined();
+      expect(result.data?.email).toBe('existente@koda.com');
+      expect((result as any).conflict).toBeUndefined();
+      expect(mockInsert).not.toHaveBeenCalled();
     });
 
-    it('should return conflict if a pending access request already exists for this email', async () => {
+    it('should return generic success without inserting or leaking existence if a pending access request already exists for this email', async () => {
       const mockUsersMaybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
       const mockUsersEq = vi.fn().mockReturnValue({ maybeSingle: mockUsersMaybeSingle });
       const mockUsersSelect = vi.fn().mockReturnValue({ eq: mockUsersEq });
@@ -69,10 +78,11 @@ describe('Access Requests Service', () => {
       const mockReqEqStatus = vi.fn().mockReturnValue({ maybeSingle: mockReqMaybeSingle });
       const mockReqEqEmail = vi.fn().mockReturnValue({ eq: mockReqEqStatus });
       const mockReqSelect = vi.fn().mockReturnValue({ eq: mockReqEqEmail });
+      const mockInsert = vi.fn();
 
       (supabase.from as any).mockImplementation((table: string) => {
         if (table === 'users') return { select: mockUsersSelect };
-        if (table === 'access_requests') return { select: mockReqSelect };
+        if (table === 'access_requests') return { select: mockReqSelect, insert: mockInsert };
         return {};
       });
 
@@ -84,8 +94,10 @@ describe('Access Requests Service', () => {
         descricao: 'Preciso de acesso',
       });
 
-      expect(result.conflict).toBe(true);
-      expect(result.error?.message).toContain('Já existe uma solicitação de acesso pendente');
+      expect(result.data).toBeDefined();
+      expect(result.data?.email).toBe('pendente@koda.com');
+      expect((result as any).conflict).toBeUndefined();
+      expect(mockInsert).not.toHaveBeenCalled();
     });
 
     it('should create new access request successfully', async () => {

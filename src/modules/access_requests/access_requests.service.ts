@@ -59,13 +59,6 @@ export const create = async (data: CreateAccessRequestDTO) => {
     .eq('email', email)
     .maybeSingle();
 
-  if (existingUser) {
-    return {
-      conflict: true,
-      error: { message: 'Este e-mail já possui cadastro na plataforma' },
-    };
-  }
-
   // 2. Verificar se já existe solicitação pendente para o e-mail
   const { data: pendingRequest } = await supabase
     .from(TABLE)
@@ -74,10 +67,21 @@ export const create = async (data: CreateAccessRequestDTO) => {
     .eq('status', AccessRequestStatus.PENDING)
     .maybeSingle();
 
-  if (pendingRequest) {
+  // Prevenção contra Enumeração de Usuários (OWASP User Enumeration / Account Harvesting):
+  // Se já existir usuário cadastrado ou solicitação pendente, não cria duplicata nem envia e-mail,
+  // retornando sucesso neutro e indistinguível para manter a superfície de ataque mínima.
+  if (existingUser || pendingRequest) {
     return {
-      conflict: true,
-      error: { message: 'Já existe uma solicitação de acesso pendente para este e-mail' },
+      data: {
+        id: 'ack',
+        nome: data.nome.trim(),
+        email,
+        empresa: data.empresa.trim(),
+        cargo: data.cargo.trim(),
+        descricao: data.descricao.trim(),
+        status: AccessRequestStatus.PENDING,
+        createdAt: new Date().toISOString(),
+      },
     };
   }
 
