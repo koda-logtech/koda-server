@@ -111,20 +111,20 @@ export const getDirection = async (req: Request, res: Response) => {
   const token = process.env.MAPBOX_ACCESS_TOKEN?.trim();
   if (!token) {
     res.status(HTTP_STATUS.SERVICE_UNAVAILABLE).json({
-      error: 'Directions indisponível: MAPBOX_ACCESS_TOKEN não configurado.',
+      error: 'Directions unavailable: MAPBOX_ACCESS_TOKEN not configured.',
     });
     return;
   }
 
   const id = Number(req.params.id);
   if (!Number.isFinite(id)) {
-    res.status(HTTP_STATUS.BAD_REQUEST).json({ error: 'ID inválido' });
+    res.status(HTTP_STATUS.BAD_REQUEST).json({ error: 'Invalid ID' });
     return;
   }
 
   const { data, error } = await service.findByIdCompleto(id);
   if (error || !data) {
-    res.status(HTTP_STATUS.NOT_FOUND).json({ error: error?.message ?? 'Não encontrado' });
+    res.status(HTTP_STATUS.NOT_FOUND).json({ error: error?.message ?? 'Not found' });
     return;
   }
 
@@ -205,5 +205,5 @@ export const remove = async (req: Request, res: Response) => {
     res.status(HTTP_STATUS.BAD_REQUEST).json({ error: error.message });
     return;
   }
-  res.status(HTTP_STATUS.OK).json({ message: 'Removido com sucesso' });
+  res.status(HTTP_STATUS.OK).json({ message: 'Successfully removed' });
 };

@@ -43,12 +43,12 @@ const startServer = async () => {
     await seedAdminUser();
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error('[Startup] Erro ao executar seed do admin:', error);
+    console.error('[Startup] Error executing admin seed:', error);
   }
 
   app.listen(PORT, '0.0.0.0', () => {
     // eslint-disable-next-line no-console
-    console.log(`Servidor rodando em http://0.0.0.0:${PORT} em modo ${NODE_ENV}`);
+    console.log(`Server running at http://0.0.0.0:${PORT} in ${NODE_ENV} mode`);
   });
 };
 

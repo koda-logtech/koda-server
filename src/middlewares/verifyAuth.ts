@@ -14,7 +14,7 @@ export const verifyAuth = (req: Request, res: Response, next: NextFunction) => {
 
   if (!token) {
     res.status(HTTP_STATUS.UNAUTHORIZED).json({
-      error: 'Token não fornecido',
+      error: 'Token not provided',
     });
     return;
   }
@@ -23,7 +23,7 @@ export const verifyAuth = (req: Request, res: Response, next: NextFunction) => {
 
   if (!decoded) {
     res.status(HTTP_STATUS.UNAUTHORIZED).json({
-      error: 'Token inválido ou expirado',
+      error: 'Invalid or expired token',
     });
     return;
   }
@@ -40,8 +40,8 @@ export const verifyAuth = (req: Request, res: Response, next: NextFunction) => {
 export const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
   if (!req.user || req.user.role !== Role.ADMIN) {
     res.status(HTTP_STATUS.FORBIDDEN).json({
-      error: 'Acesso negado',
-      message: 'Apenas administradores podem acessar este recurso',
+      error: 'Access denied',
+      message: 'Only administrators can access this resource',
     });
     return;
   }
