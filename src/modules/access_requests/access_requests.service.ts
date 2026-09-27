@@ -281,7 +281,9 @@ export const reject = async (id: string, reason?: string, notify = true) => {
     .single();
 
   // Caso a coluna rejection_reason ainda não tenha sido criada no Supabase, tenta atualizar sem ela
-  if (updateError && updateError.message?.includes('rejection_reason')) {
+  if (updateError && 'rejection_reason' in updatePayload) {
+    // eslint-disable-next-line no-console
+    console.warn('[AccessRequests] Falha ao persistir rejection_reason no banco. Aplicando fallback sem o campo:', updateError.message || updateError);
     delete updatePayload.rejection_reason;
     const retry = await supabase
       .from(TABLE)
