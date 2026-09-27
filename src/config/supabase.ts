@@ -5,7 +5,7 @@ const env = getEnvironment();
 
 if (!env.supabase.url || !env.supabase.apiKey) {
   throw new Error(
-    'Credenciais obrigatórias do Supabase não configuradas: SUPABASE_URL e SUPABASE_API_KEY',
+    'Mandatory Supabase credentials not configured: SUPABASE_URL and SUPABASE_API_KEY',
   );
 }
 

@@ -147,7 +147,7 @@ export const approve = async (id: string, origin?: string) => {
     .single();
 
   if (findError || !request) {
-    return { notFound: true, error: { message: 'Solicitação não encontrada' } };
+    return { notFound: true, error: { message: 'Request not found' } };
   }
 
   if (request.status !== AccessRequestStatus.PENDING) {
@@ -228,7 +228,7 @@ export const approve = async (id: string, origin?: string) => {
     name: userName,
     activationLink,
   }).catch((err) => {
-    console.error('Falha ao enviar e-mail de ativação em background:', err);
+    console.error('Failed to send activation email in background:', err);
   });
 
   const userData = {
@@ -245,7 +245,7 @@ export const approve = async (id: string, origin?: string) => {
       request: formatAccessRequest(updatedRequest),
       activationToken,
       activationLink,
-      message: 'Solicitação aprovada com sucesso',
+      message: 'Request successfully approved',
     },
   };
 };
@@ -258,7 +258,7 @@ export const reject = async (id: string, reason?: string, notify = true) => {
     .single();
 
   if (findError || !request) {
-    return { notFound: true, error: { message: 'Solicitação não encontrada' } };
+    return { notFound: true, error: { message: 'Request not found' } };
   }
 
   if (request.status !== AccessRequestStatus.PENDING) {
@@ -287,7 +287,7 @@ export const reject = async (id: string, reason?: string, notify = true) => {
   // Caso a coluna rejection_reason ainda não tenha sido criada no Supabase, tenta atualizar sem ela
   if (updateError && 'rejection_reason' in updatePayload) {
     // eslint-disable-next-line no-console
-    console.warn('[AccessRequests] Falha ao persistir rejection_reason no banco. Aplicando fallback sem o campo:', updateError.message || updateError);
+    console.warn('[AccessRequests] Failed to persist rejection_reason in the database. Applying fallback without the field:', updateError.message || updateError);
     delete updatePayload.rejection_reason;
     const retry = await supabase
       .from(TABLE)
@@ -311,7 +311,7 @@ export const reject = async (id: string, reason?: string, notify = true) => {
       reason: reason?.trim(),
     }).catch((err) => {
       // eslint-disable-next-line no-console
-      console.error('[Email] Falha ao enviar e-mail de rejeição em background:', err);
+      console.error('[Email] Failed to send rejection email in background:', err);
     });
   }
 

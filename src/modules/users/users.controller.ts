@@ -58,7 +58,7 @@ export const remove = async (req: Request, res: Response) => {
     res.status(HTTP_STATUS.BAD_REQUEST).json({ error: error.message });
     return;
   }
-  res.status(HTTP_STATUS.OK).json({ message: 'Removido com sucesso' });
+  res.status(HTTP_STATUS.OK).json({ message: 'Successfully removed' });
 };
 
 // Validation schemas
@@ -95,7 +95,7 @@ export const register = async (req: Request, res: Response) => {
 
   if (validationError) {
     res.status(HTTP_STATUS.BAD_REQUEST).json({
-      error: 'Dados de entrada inválidos',
+      error: 'Invalid input data',
       details: validationError.message,
     });
     return;
@@ -128,7 +128,7 @@ export const login = async (req: Request, res: Response) => {
 
   if (validationError) {
     res.status(HTTP_STATUS.BAD_REQUEST).json({
-      error: 'Dados de entrada inválidos',
+      error: 'Invalid input data',
       details: validationError.message,
     });
     return;
@@ -159,10 +159,10 @@ export const login = async (req: Request, res: Response) => {
     });
     res.status(HTTP_STATUS.OK).json({
       user: data.user,
-      message: 'Login realizado com sucesso',
+      message: 'Login successfully completed',
     });
   } else {
-    res.status(HTTP_STATUS.UNAUTHORIZED).json({ error: 'Erro ao gerar tokens' });
+    res.status(HTTP_STATUS.UNAUTHORIZED).json({ error: 'Error generating tokens' });
   }
 };
 
@@ -171,7 +171,7 @@ export const refreshToken = async (req: Request, res: Response) => {
 
   if (!token) {
     res.status(HTTP_STATUS.UNAUTHORIZED).json({
-      error: 'Token não fornecido',
+      error: 'Token not provided',
     });
     return;
   }
@@ -180,7 +180,7 @@ export const refreshToken = async (req: Request, res: Response) => {
 
   if (!decoded) {
     res.status(HTTP_STATUS.UNAUTHORIZED).json({
-      error: 'Token inválido ou expirado',
+      error: 'Invalid or expired token',
     });
     return;
   }
@@ -189,7 +189,7 @@ export const refreshToken = async (req: Request, res: Response) => {
 
   if (error || !user) {
     res.status(HTTP_STATUS.UNAUTHORIZED).json({
-      error: 'Usuário não encontrado',
+      error: 'User not found',
     });
     return;
   }
@@ -205,7 +205,7 @@ export const refreshToken = async (req: Request, res: Response) => {
     maxAge: 15 * 60 * 1000, // 15 min
   });
 
-  res.status(HTTP_STATUS.OK).json({ message: 'Token renovado' });
+  res.status(HTTP_STATUS.OK).json({ message: 'Token renewed' });
 };
 
 export const profile = async (req: Request, res: Response) => {
@@ -213,7 +213,7 @@ export const profile = async (req: Request, res: Response) => {
 
   if (!user) {
     res.status(HTTP_STATUS.UNAUTHORIZED).json({
-      error: 'Usuário não autenticado',
+      error: 'User not authenticated',
     });
     return;
   }
@@ -222,7 +222,7 @@ export const profile = async (req: Request, res: Response) => {
 
   if (error || !userProfile) {
     res.status(HTTP_STATUS.NOT_FOUND).json({
-      error: 'Perfil não encontrado',
+      error: 'Profile not found',
     });
     return;
   }
@@ -235,7 +235,7 @@ export const changePassword = async (req: Request, res: Response) => {
 
   if (validationError) {
     res.status(HTTP_STATUS.BAD_REQUEST).json({
-      error: 'Dados de entrada inválidos',
+      error: 'Invalid input data',
       details: validationError.message,
     });
     return;
@@ -245,7 +245,7 @@ export const changePassword = async (req: Request, res: Response) => {
 
   if (!user) {
     res.status(HTTP_STATUS.UNAUTHORIZED).json({
-      error: 'Usuário não autenticado',
+      error: 'User not authenticated',
     });
     return;
   }
@@ -269,7 +269,7 @@ export const changePassword = async (req: Request, res: Response) => {
   }
 
   res.status(HTTP_STATUS.OK).json({
-    message: 'Senha alterada com sucesso',
+    message: 'Password successfully changed',
   });
 };
 
@@ -280,7 +280,7 @@ export const logout = async (req: Request, res: Response) => {
   res.clearCookie('refresh_token', cookieOptions);
 
   res.status(HTTP_STATUS.OK).json({
-    message: 'Desconectado com sucesso',
+    message: 'Successfully logged out',
   });
 };
 
@@ -289,7 +289,7 @@ export const promote = async (req: Request, res: Response) => {
 
   if (validationError) {
     res.status(HTTP_STATUS.BAD_REQUEST).json({
-      error: 'Dados de entrada inválidos',
+      error: 'Invalid input data',
       details: validationError.message,
     });
     return;
@@ -300,7 +300,7 @@ export const promote = async (req: Request, res: Response) => {
     res.status(HTTP_STATUS.BAD_REQUEST).json({ error: error.message });
     return;
   }
-  res.status(HTTP_STATUS.OK).json({ message: 'Role promovida com sucesso', user: data });
+  res.status(HTTP_STATUS.OK).json({ message: 'Role successfully promoted', user: data });
 };
 
 export const revoke = async (req: Request, res: Response) => {
@@ -309,7 +309,7 @@ export const revoke = async (req: Request, res: Response) => {
     res.status(HTTP_STATUS.BAD_REQUEST).json({ error: error.message });
     return;
   }
-  res.status(HTTP_STATUS.OK).json({ message: 'Role revogada com sucesso', user: data });
+  res.status(HTTP_STATUS.OK).json({ message: 'Role successfully revoked', user: data });
 };
 
 export const activate = async (req: Request, res: Response) => {
@@ -317,7 +317,7 @@ export const activate = async (req: Request, res: Response) => {
 
   if (validationError) {
     res.status(HTTP_STATUS.BAD_REQUEST).json({
-      error: 'Dados de entrada inválidos',
+      error: 'Invalid input data',
       details: validationError.message,
     });
     return;
@@ -333,6 +333,6 @@ export const activate = async (req: Request, res: Response) => {
   }
 
   res.status(HTTP_STATUS.OK).json({
-    message: 'Conta ativada com sucesso. Você já pode fazer login.',
+    message: 'Account successfully activated. You can now log in.',
   });
 };

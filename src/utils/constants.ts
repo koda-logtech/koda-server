@@ -14,12 +14,12 @@ export const HTTP_STATUS = {
 };
 
 export const ERROR_MESSAGES = {
-  INVALID_INPUT: 'Dados de entrada inválidos',
-  NOT_FOUND: 'Recurso não encontrado',
-  UNAUTHORIZED: 'Não autorizado',
-  FORBIDDEN: 'Acesso negado',
-  CONFLICT: 'Conflito nos dados',
-  INTERNAL_ERROR: 'Erro interno do servidor',
+  INVALID_INPUT: 'Invalid input data',
+  NOT_FOUND: 'Resource not found',
+  UNAUTHORIZED: 'Unauthorized',
+  FORBIDDEN: 'Access denied',
+  CONFLICT: 'Data conflict',
+  INTERNAL_ERROR: 'Internal server error',
 };
 
 export const LOG_LEVELS = {

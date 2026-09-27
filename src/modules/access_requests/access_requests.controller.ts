@@ -16,7 +16,7 @@ export const create = async (req: Request, res: Response) => {
 
   if (validationError) {
     res.status(HTTP_STATUS.BAD_REQUEST).json({
-      error: 'Dados de entrada inválidos',
+      error: 'Invalid input data',
       details: validationError.message,
     });
     return;
@@ -51,7 +51,7 @@ export const getById = async (req: Request, res: Response) => {
   const { data, error } = await service.findById(req.params.id);
 
   if (error || !data) {
-    res.status(HTTP_STATUS.NOT_FOUND).json({ error: 'Solicitação não encontrada' });
+    res.status(HTTP_STATUS.NOT_FOUND).json({ error: 'Request not found' });
     return;
   }
 

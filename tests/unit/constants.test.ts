@@ -19,8 +19,8 @@ describe('Constants', () => {
   });
 
   it('should define common error messages', () => {
-    expect(ERROR_MESSAGES.NOT_FOUND).toBe('Recurso não encontrado');
-    expect(ERROR_MESSAGES.UNAUTHORIZED).toBe('Não autorizado');
+    expect(ERROR_MESSAGES.NOT_FOUND).toBe('Resource not found');
+    expect(ERROR_MESSAGES.UNAUTHORIZED).toBe('Unauthorized');
   });
 
   it('should define environments', () => {

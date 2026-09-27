@@ -17,7 +17,7 @@ export const getTelemetriaAuditoria = async (req: Request, res: Response) => {
 export const getTelemetriaAuditoriaByCarga = async (req: Request, res: Response) => {
   const cargaId = Number(req.params.id);
   if (!Number.isFinite(cargaId) || cargaId <= 0) {
-    res.status(HTTP_STATUS.BAD_REQUEST).json({ error: 'ID de carga inválido' });
+    res.status(HTTP_STATUS.BAD_REQUEST).json({ error: 'Invalid cargo ID' });
     return;
   }
 
@@ -74,5 +74,5 @@ export const remove = async (req: Request, res: Response) => {
     res.status(HTTP_STATUS.BAD_REQUEST).json({ error: error.message });
     return;
   }
-  res.status(HTTP_STATUS.OK).json({ message: 'Removido com sucesso' });
+  res.status(HTTP_STATUS.OK).json({ message: 'Successfully removed' });
 };

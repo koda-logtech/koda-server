@@ -35,7 +35,7 @@ export const getAll = async (req: Request, res: Response) => {
 export const getById = async (req: Request, res: Response) => {
   const id = parseId(req.params.id);
   if (id == null) {
-    res.status(HTTP_STATUS.BAD_REQUEST).json({ error: 'ID inválido' });
+    res.status(HTTP_STATUS.BAD_REQUEST).json({ error: 'Invalid ID' });
     return;
   }
 
@@ -60,7 +60,7 @@ export const countAbertos = async (req: Request, res: Response) => {
 export const cancelar = async (req: Request, res: Response) => {
   const id = parseId(req.params.id);
   if (id == null) {
-    res.status(HTTP_STATUS.BAD_REQUEST).json({ error: 'ID inválido' });
+    res.status(HTTP_STATUS.BAD_REQUEST).json({ error: 'Invalid ID' });
     return;
   }
 

@@ -91,5 +91,5 @@ export const remove = async (req: Request, res: Response) => {
     res.status(HTTP_STATUS.BAD_REQUEST).json({ error: error.message });
     return;
   }
-  res.status(HTTP_STATUS.OK).json({ message: 'Removido com sucesso' });
+  res.status(HTTP_STATUS.OK).json({ message: 'Successfully removed' });
 };

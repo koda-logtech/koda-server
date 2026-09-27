@@ -92,17 +92,17 @@ export const loginUser = async (
       .single();
 
     if (findError || !user) {
-      return { error: { message: 'Usuário não encontrado' } };
+      return { error: { message: 'User not found' } };
     }
 
     const isPasswordValid = await verifyPassword(password, user.password);
 
     if (!isPasswordValid) {
-      return { error: { message: 'Senha incorreta' } };
+      return { error: { message: 'Incorrect password' } };
     }
 
     if (!user.is_active) {
-      return { error: { message: 'Usuário inativo' } };
+      return { error: { message: 'Inactive user' } };
     }
 
     const accessToken = signToken({
@@ -163,13 +163,13 @@ export const updatePassword = async (
       .single();
 
     if (findError || !user) {
-      return { error: { message: 'Usuário não encontrado' } };
+      return { error: { message: 'User not found' } };
     }
 
     const isPasswordValid = await verifyPassword(oldPassword, user.password);
 
     if (!isPasswordValid) {
-      return { error: { message: 'Senha atual incorreta' } };
+      return { error: { message: 'Current password incorrect' } };
     }
 
     const hashedNewPassword = await hashPassword(newPassword);
@@ -222,7 +222,7 @@ export const activateUser = async (
   try {
     const decoded = verifyActivationToken(token);
     if (!decoded) {
-      return { error: { message: 'Token de ativação inválido ou expirado' } };
+      return { error: { message: 'Invalid or expired activation token' } };
     }
 
     const { data: user, error: findError } = await supabase
@@ -232,7 +232,7 @@ export const activateUser = async (
       .single();
 
     if (findError || !user) {
-      return { error: { message: 'Usuário não encontrado' } };
+      return { error: { message: 'User not found' } };
     }
 
     const hashedPassword = await hashPassword(newPassword);
@@ -251,7 +251,7 @@ export const activateUser = async (
 
     return { success: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Erro ao ativar conta';
+    const message = err instanceof Error ? err.message : 'Error activating account';
     return { error: { message } };
   }
 };
@@ -263,7 +263,7 @@ export const seedAdminUser = async (): Promise<void> => {
 
   if (!email || !password) {
     // eslint-disable-next-line no-console
-    console.log('[Seed] ADMIN_EMAIL ou ADMIN_PASSWORD não configurados. Criação de admin ignorada.');
+    console.log('[Seed] ADMIN_EMAIL or ADMIN_PASSWORD not configured. Admin creation skipped.');
     return;
   }
 
@@ -276,7 +276,7 @@ export const seedAdminUser = async (): Promise<void> => {
 
     if (findError) {
       // eslint-disable-next-line no-console
-      console.error('[Seed] Erro ao verificar usuário admin no Supabase:', findError.message);
+      console.error('[Seed] Error verifying admin user in Supabase:', findError.message);
       return;
     }
 
@@ -307,15 +307,15 @@ export const seedAdminUser = async (): Promise<void> => {
 
         if (updateError) {
           // eslint-disable-next-line no-console
-          console.error('[Seed] Erro ao atualizar usuário admin existente:', updateError.message);
+          console.error('[Seed] Error updating existing admin user:', updateError.message);
           return;
         }
 
         // eslint-disable-next-line no-console
-        console.log(`[Seed] Usuário admin (${email}) atualizado com sucesso.`);
+        console.log(`[Seed] Admin user (${email}) successfully updated.`);
       } else {
         // eslint-disable-next-line no-console
-        console.log(`[Seed] Usuário administrador (${email}) já está devidamente configurado.`);
+        console.log(`[Seed] Admin user (${email}) is already properly configured.`);
       }
       return;
     }
@@ -334,14 +334,14 @@ export const seedAdminUser = async (): Promise<void> => {
 
     if (insertError) {
       // eslint-disable-next-line no-console
-      console.error('[Seed] Erro ao criar usuário admin:', insertError.message);
+      console.error('[Seed] Error creating admin user:', insertError.message);
       return;
     }
 
     // eslint-disable-next-line no-console
-    console.log(`[Seed] Usuário administrador (${email}) criado com sucesso.`);
+    console.log(`[Seed] Admin user (${email}) successfully created.`);
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error('[Seed] Erro inesperado ao inicializar admin:', error);
+    console.error('[Seed] Unexpected error initializing admin:', error);
   }
 };

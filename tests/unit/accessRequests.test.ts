@@ -321,7 +321,7 @@ describe('Access Requests Service', () => {
   describe('activateUser', () => {
     it('should fail with invalid activation token', async () => {
       const result = await usersService.activateUser('invalid-token', 'novasenha123');
-      expect(result.error?.message).toContain('inválido ou expirado');
+      expect(result.error?.message).toContain('Invalid or expired');
     });
 
     it('should successfully activate user and update password with valid token', async () => {
